@@ -11,6 +11,9 @@ export type Palette = {
   onAccent: string;
   record: string;
   onRecord: string;
+  /** Translucent backing for text drawn over the live camera (prompter, controls). */
+  scrim: string;
+  onScrim: string;
 };
 
 export const darkPalette: Palette = {
@@ -24,6 +27,8 @@ export const darkPalette: Palette = {
   onAccent: '#1A1204',
   record: '#FF3B30',
   onRecord: '#FFFFFF',
+  scrim: 'rgba(0, 0, 0, 0.55)',
+  onScrim: '#FFFFFF',
 };
 
 export const lightPalette: Palette = {
@@ -37,4 +42,7 @@ export const lightPalette: Palette = {
   onAccent: '#FFFFFF',
   record: '#E5281E',
   onRecord: '#FFFFFF',
+  // The camera image underneath is the same in both themes, so the scrim is too.
+  scrim: 'rgba(0, 0, 0, 0.55)',
+  onScrim: '#FFFFFF',
 };

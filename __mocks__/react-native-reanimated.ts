@@ -5,7 +5,7 @@
 // functions), so a small synchronous stand-in is enough: shared values are plain
 // boxes, animated styles are computed once, animations jump to their target.
 // Extend it when a component starts using more of the API.
-import { useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { Image, ScrollView, Text, View } from 'react-native';
 
 type Updater<T> = T | ((previous: T) => T);
@@ -40,6 +40,39 @@ export const useDerivedValue = <T>(compute: () => T) => makeMutable(compute());
 export const withTiming = passThrough;
 export const withSpring = passThrough;
 export const cancelAnimation = () => {};
+
+type FrameInfo = {
+  timestamp: number;
+  timeSincePreviousFrame: number | null;
+  timeSinceFirstFrame: number;
+};
+const frameCallbacks = new Set<(info: FrameInfo) => void>();
+
+/** Frame callbacks only run when a test calls mockRunFrames. */
+export function useFrameCallback(callback: (info: FrameInfo) => void) {
+  const latest = useRef(callback);
+  latest.current = callback;
+  useEffect(() => {
+    const run = (info: FrameInfo) => latest.current(info);
+    frameCallbacks.add(run);
+    return () => {
+      frameCallbacks.delete(run);
+    };
+  }, []);
+  return { setActive: () => {}, isActive: true, callbackId: 0 };
+}
+
+/** Test helper: deliver `count` frames, `frameMs` apart, to every frame callback. */
+export function mockRunFrames(count: number, frameMs = 16) {
+  for (let i = 1; i <= count; i++) {
+    const info = {
+      timestamp: i * frameMs,
+      timeSincePreviousFrame: frameMs,
+      timeSinceFirstFrame: i * frameMs,
+    };
+    frameCallbacks.forEach((run) => run(info));
+  }
+}
 
 // Used by react-native-gesture-handler when Reanimated is installed.
 export const isSharedValue = (value: unknown) =>
