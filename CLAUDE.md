@@ -54,6 +54,23 @@ __tests__/ veya *.test.ts(x) dosyaları ilgili kodun yanında
 - Ekran yönü kayıt başında sabitlenir.
 - Kayıt bittiğinde video galeride "Prompter" albümüne kaydedilir.
 
-## İş takibi
+## İş takibi — BACKLOG.md
 
-Issue'lar PRM-1 … PRM-33 olarak numaralı (6 sprint). Bir göreve başlarken kabul kriterlerini oku; bitince her kriterin karşılandığını tek tek doğrula ve özetle.
+Tüm işler `BACKLOG.md` içinde, yapılacak sırayla. Kullanıcı "sıradaki işi yap" dediğinde:
+
+1. `BACKLOG.md`'yi oku, yukarıdan aşağıya ilk `[ ]` maddeyi bul.
+2. **FURKAN** etiketliyse ve gereken bilgi yoksa: kodlamaya başlamadan önce sor. Bulut/gözetimsiz çalışıyorsan bu maddeyi atla, sıradaki uygun maddeye geç ve atladığını rapor et.
+3. **CİHAZ** etiketliyse: kodu yaz, testleri geçir, maddeyi `[~]` yap ve sonuna "Cihazda nasıl test edilir" adımlarını yaz.
+4. **BULUT** etiketliyse: kodu yaz, typecheck + lint + test geçince `[x]` yap.
+5. Bir maddenin önkoşulu (ör. "önkoşul: PRM-2") `[x]` değilse o maddeye başlama.
+6. `BACKLOG.md`'deki durumu güncelle ve aynı commit'e dahil et: `PRM-<no>: kısa açıklama`.
+7. Bitince kısa özet: ne yapıldı, kabul kriterleri tek tek, benden ne bekleniyor.
+
+Gözetimsiz (bulut/zamanlanmış) çalışmada:
+
+- Her zaman ayrı branch'te çalış (`prm-<no>-kisa-ad`) ve pull request aç; `main`'e doğrudan push etme.
+- Bir oturumda en fazla **2 madde** yap.
+- `[~]` maddeleri `[x]` yapma; onu yalnızca Furkan yapar.
+- Hata çözülemiyorsa maddeyi `[!]` yap, sebebini altına yaz, devam etme.
+
+Kullanıcı cihaz testinde hata bildirirse: `BACKLOG.md` "Notlar / bulgular" bölümüne `BUG-<no>` olarak ekle ve önce onu düzelt.
