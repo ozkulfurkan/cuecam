@@ -1,4 +1,6 @@
-// Used automatically by Jest for 'react-native-reanimated'.
+// Reanimated stand-in for Jest, used for both "react-native-reanimated"
+// (via __mocks__/react-native-reanimated.ts) and "react-native-reanimated/mock"
+// (mapped in package.json; expo-router/testing-library requests that one).
 //
 // Reanimated's bundled mock still boots the real native entry points, which fail
 // under jest-expo. Animation timing is not unit-tested (motion logic lives in pure

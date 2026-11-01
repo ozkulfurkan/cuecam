@@ -12,6 +12,7 @@ import { StyleSheet } from 'react-native';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 
 import { APP_LOCK } from '@/features/camera/orientation';
+import { I18nProvider, useI18n } from '@/i18n/I18nProvider';
 import { buildSentryOptions } from '@/lib/monitoring';
 import { ThemeProvider, useTheme } from '@/theme';
 
@@ -29,6 +30,7 @@ lockAsync(APP_LOCK).catch(Sentry.captureException);
 
 function RootStack() {
   const { scheme, colors } = useTheme();
+  const { t } = useI18n();
   const base = scheme === 'dark' ? DarkTheme : DefaultTheme;
   const navigationTheme = {
     ...base,
@@ -50,6 +52,11 @@ function RootStack() {
         <Stack.Screen name="(tabs)" />
         {/* Recording covers the whole screen, outside the tab bar. */}
         <Stack.Screen name="record" options={{ presentation: 'fullScreenModal' }} />
+        <Stack.Screen
+          name="script/[id]"
+          options={{ headerShown: true, title: t('editor.title') }}
+        />
+        <Stack.Screen name="recording/[id]" options={{ presentation: 'fullScreenModal' }} />
       </Stack>
     </NavigationThemeProvider>
   );
@@ -59,7 +66,9 @@ function RootLayout() {
   return (
     <GestureHandlerRootView style={styles.root}>
       <ThemeProvider>
-        <RootStack />
+        <I18nProvider>
+          <RootStack />
+        </I18nProvider>
       </ThemeProvider>
     </GestureHandlerRootView>
   );
