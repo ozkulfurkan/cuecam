@@ -18,14 +18,18 @@ type Props = {
   position: LensPosition;
   /** Extra outputs on the same session, e.g. the video recorder. */
   outputs?: CameraOutput[];
+  /** Keep the session running in the background (see useIsCameraActive). */
+  keepRunning?: boolean;
+  /** The OS interrupted the session (call, another app, overheating …). */
+  onInterruptionStarted?: (reason: string) => void;
 };
 
 /** Full-screen live camera feed. The front camera is mirrored, like a mirror. */
-export function CameraPreview({ position, outputs }: Props) {
+export function CameraPreview({ position, outputs, keepRunning, onInterruptionStarted }: Props) {
   const { colors } = useTheme();
   const { t } = useI18n();
   const insets = useSafeAreaInsets();
-  const isActive = useIsCameraActive();
+  const isActive = useIsCameraActive(keepRunning);
   const positions = useCameraDevices().map((device) => device.position);
   const lens = resolvePosition(position, positions);
   const device = useCameraDevice(lens ?? position);
@@ -56,6 +60,9 @@ export function CameraPreview({ position, outputs }: Props) {
         orientationSource="interface"
         resizeMode="cover"
         onSessionConfigSelected={(config) => setSelectedFps(config.selectedFPS)}
+        // iOS reports why (calls take the microphone, overheating, …); Android
+        // always reports 'unknown'.
+        onInterruptionStarted={onInterruptionStarted}
       />
       {__DEV__ && selectedFps !== undefined ? (
         // Dev-only readout to verify the negotiated frame rate on real devices.

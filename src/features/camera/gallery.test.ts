@@ -1,6 +1,12 @@
 import { translate } from '@/i18n/translate';
 
-import { ALBUM_NAME, galleryPermissionStep, saveResultMessage, toFileUri } from './gallery';
+import {
+  ALBUM_NAME,
+  galleryPermissionStep,
+  saveNotice,
+  saveResultMessage,
+  toFileUri,
+} from './gallery';
 
 const en = (key: Parameters<typeof translate>[1], params?: Parameters<typeof translate>[2]) =>
   translate('en', key, params);
@@ -48,6 +54,28 @@ describe('saveResultMessage', () => {
     );
     expect(saveResultMessage({ kind: 'failed', message: 'disk full' }, en)).toBe(
       'Not saved: disk full',
+    );
+  });
+});
+
+describe('saveNotice', () => {
+  it('uses the plain messages for a normal take', () => {
+    expect(saveNotice({ kind: 'saving' }, false, en)).toBe('Saving to gallery…');
+    expect(saveNotice({ kind: 'saved' }, false, en)).toBe('Saved to the "Prompter" album');
+  });
+
+  it('says an interrupted take was cut short but kept', () => {
+    expect(saveNotice({ kind: 'saving' }, true, en)).toBe(
+      'Recording was interrupted — saving the video…',
+    );
+    expect(saveNotice({ kind: 'saved' }, true, en)).toBe(
+      'Recording was interrupted — video saved to the "Prompter" album',
+    );
+  });
+
+  it('explains why an interrupted take could not be saved', () => {
+    expect(saveNotice({ kind: 'failed', message: 'disk full' }, true, en)).toBe(
+      'Recording was interrupted. Not saved: disk full',
     );
   });
 });

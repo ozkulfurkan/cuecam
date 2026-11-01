@@ -1,11 +1,13 @@
 import { act, fireEvent, render, screen } from '@testing-library/react-native';
 import * as mediaLibraryModule from 'expo-media-library';
-import { StyleSheet } from 'react-native';
+import * as fileSystemModule from 'expo-file-system';
+import { AppState, StyleSheet, type AppStateStatus } from 'react-native';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import * as reanimatedModule from 'react-native-reanimated';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import * as visionCameraModule from 'react-native-vision-camera';
 
+import { savePendingRecording } from '@/storage/pendingRecording';
 import { storage } from '@/storage/storage';
 
 import { Recorder } from './Recorder';
@@ -29,6 +31,9 @@ const mediaLibrary = mediaLibraryModule as unknown as {
   setMockGalleryPermission: (current: { granted: boolean; canAskAgain: boolean }) => void;
   mockGallery: { albums: Map<string, string[]> };
 };
+
+// Helper from __mocks__/expo-file-system.ts.
+const fileSystem = fileSystemModule as unknown as { mockFiles: { existing: Set<string> } };
 
 // Helper from __mocks__/react-native-reanimated.ts.
 const reanimated = reanimatedModule as unknown as {
@@ -297,5 +302,132 @@ describe('prompter', () => {
     await renderRecorder();
     expect(screen.getByText('Speed 5')).toBeTruthy();
     expect(screen.getByText('Size 34')).toBeTruthy();
+  });
+});
+
+describe('interruptions', () => {
+  let appStateListeners: ((state: AppStateStatus) => void)[] = [];
+  const appState = AppState as { currentState: AppStateStatus };
+  const initialState = appState.currentState;
+
+  beforeEach(() => {
+    appStateListeners = [];
+    appState.currentState = 'active';
+    jest.spyOn(AppState, 'addEventListener').mockImplementation((_type, listener) => {
+      appStateListeners.push(listener);
+      return {
+        remove: () => {
+          appStateListeners = appStateListeners.filter((l) => l !== listener);
+        },
+      } as ReturnType<typeof AppState.addEventListener>;
+    });
+  });
+
+  afterEach(() => {
+    jest.restoreAllMocks();
+    appState.currentState = initialState;
+    fileSystem.mockFiles.existing.clear();
+  });
+
+  async function moveAppTo(state: AppStateStatus) {
+    appState.currentState = state;
+    await act(async () => appStateListeners.forEach((listener) => listener(state)));
+  }
+
+  it('stops the take when the app goes to the background and saves it on return', async () => {
+    await renderRecorder();
+    await startRecording();
+    const recorder = latestRecorder();
+    const stopSpy = jest.spyOn(
+      recorder as unknown as { stopRecording: () => Promise<void> },
+      'stopRecording',
+    );
+
+    await moveAppTo('background');
+    expect(stopSpy).toHaveBeenCalledTimes(1);
+    // The session stays up until the file is finalized.
+    expect(cameraProps().isActive).toBe(true);
+
+    await act(() => recorder.finishNow());
+    // Nothing is written to the gallery while the app is in the background.
+    expect(mediaLibrary.mockGallery.albums.get('Prompter')).toBeUndefined();
+    expect(storage.getString('recorder.pendingRecording.v1')).toContain(recorder.filePath);
+
+    await moveAppTo('active');
+    expect(
+      await screen.findByText('Recording was interrupted — video saved to the "Prompter" album'),
+    ).toBeTruthy();
+    expect(mediaLibrary.mockGallery.albums.get('Prompter')).toEqual([
+      `file://${recorder.filePath}`,
+    ]);
+    expect(storage.getString('recorder.pendingRecording.v1')).toBeUndefined();
+  });
+
+  it('keeps recording through iOS inactive (Control Center, call banner)', async () => {
+    await renderRecorder();
+    await startRecording();
+    const stopSpy = jest.spyOn(
+      latestRecorder() as unknown as { stopRecording: () => Promise<void> },
+      'stopRecording',
+    );
+
+    await moveAppTo('inactive');
+    expect(stopSpy).not.toHaveBeenCalled();
+    expect(screen.getByRole('button', { name: 'Stop recording' })).toBeTruthy();
+  });
+
+  it('cancels a countdown when the app goes to the background', async () => {
+    await renderRecorder();
+    await pressButton('Start recording');
+    await moveAppTo('background');
+    await act(() => jest.advanceTimersByTime(4000));
+
+    expect(visionCamera.mockRecorders).toHaveLength(0);
+  });
+
+  it('rescues the file when a call interrupts the camera and the recorder errors', async () => {
+    await renderRecorder();
+    await startRecording();
+    const recorder = latestRecorder();
+    fileSystem.mockFiles.existing.add(`file://${recorder.filePath}`);
+
+    await act(async () =>
+      cameraProps().onInterruptionStarted('audio-device-in-use-by-another-client'),
+    );
+    // iOS ends an interrupted movie with an error although the file is usable.
+    await act(() => recorder.failNow('Session was interrupted'));
+
+    expect(
+      await screen.findByText('Recording was interrupted — video saved to the "Prompter" album'),
+    ).toBeTruthy();
+    expect(screen.queryByText(/Recording failed/)).toBeNull();
+  });
+
+  it('still reports a failure when nothing was written', async () => {
+    await renderRecorder();
+    await startRecording();
+    await act(() => latestRecorder().failNow('Camera is in use'));
+
+    expect(screen.getByText('Recording failed: Camera is in use')).toBeTruthy();
+  });
+
+  it('saves a take left over from a previous visit', async () => {
+    savePendingRecording({ path: '/tmp/left-over.mp4', durationSeconds: 9 });
+    fileSystem.mockFiles.existing.add('file:///tmp/left-over.mp4');
+
+    await renderRecorder();
+    await act(() => jest.advanceTimersByTime(10));
+
+    expect(
+      await screen.findByText('Recording was interrupted — video saved to the "Prompter" album'),
+    ).toBeTruthy();
+    expect(mediaLibrary.mockGallery.albums.get('Prompter')).toEqual(['file:///tmp/left-over.mp4']);
+  });
+
+  it('forgets a left-over take whose file is gone', async () => {
+    savePendingRecording({ path: '/tmp/gone.mp4', durationSeconds: 9 });
+    await renderRecorder();
+
+    expect(storage.getString('recorder.pendingRecording.v1')).toBeUndefined();
   });
 });

@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 
 import { COUNTDOWN_SECONDS, countdownValue } from './countdown';
 
@@ -28,6 +28,13 @@ export function useCountdown(from = COUNTDOWN_SECONDS) {
     return () => clearInterval(timer);
   }, [value, from]);
 
+  // Stable identity so listeners that cancel the countdown subscribe once.
+  const cancel = useCallback(() => {
+    startedAt.current = undefined;
+    onDoneRef.current = undefined;
+    setValue(undefined);
+  }, []);
+
   return {
     value,
     isRunning: value !== undefined,
@@ -36,10 +43,6 @@ export function useCountdown(from = COUNTDOWN_SECONDS) {
       startedAt.current = Date.now();
       setValue(from);
     },
-    cancel: () => {
-      startedAt.current = undefined;
-      onDoneRef.current = undefined;
-      setValue(undefined);
-    },
+    cancel,
   };
 }

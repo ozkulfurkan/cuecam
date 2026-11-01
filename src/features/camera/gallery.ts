@@ -42,3 +42,20 @@ export function saveResultMessage(result: SaveResult, t: Translate): string {
       return t('recorder.notSavedError', { error: result.message });
   }
 }
+
+/** What the recorder shows about the last take: being saved, or how saving went. */
+export type SaveStatus = { kind: 'saving' } | SaveResult;
+
+/**
+ * The notice under the record button. A take cut short by an interruption
+ * (backgrounding, a call …) says so, so the user knows why it ended early and
+ * that the part filmed so far was kept.
+ */
+export function saveNotice(status: SaveStatus, interrupted: boolean, t: Translate): string {
+  if (status.kind === 'saving') {
+    return t(interrupted ? 'recorder.interruptedSaving' : 'recorder.saving');
+  }
+  if (!interrupted) return saveResultMessage(status, t);
+  if (status.kind === 'saved') return t('recorder.interruptedSaved', { album: ALBUM_NAME });
+  return t('recorder.interruptedNotSaved', { reason: saveResultMessage(status, t) });
+}

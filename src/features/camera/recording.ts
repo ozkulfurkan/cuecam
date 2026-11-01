@@ -1,23 +1,31 @@
+import type { InterruptionCause } from './interruption';
+
 export type RecordingStatus = 'idle' | 'starting' | 'recording' | 'stopping';
 
 export type FinishedRecording = {
   /** Filesystem path (not a file:// URL) of the finished video. */
   path: string;
   durationSeconds: number;
+  /** Set when the take ended because of an interruption, not the stop button. */
+  interruptedBy?: InterruptionCause;
 };
 
 export type RecordingState = {
   status: RecordingStatus;
   lastRecording?: FinishedRecording;
   error?: string;
+  /** An interruption that is stopping (or, while starting, will stop) the take. */
+  interruptedBy?: InterruptionCause;
 };
 
 export type RecordingEvent =
   | { type: 'start' }
   | { type: 'started' }
   | { type: 'stop' }
+  | { type: 'interrupted'; cause: InterruptionCause }
   | { type: 'finished'; recording: FinishedRecording }
-  | { type: 'failed'; message: string };
+  /** `rescued`: the take errored but its file was kept (see shouldRescueAfterError). */
+  | { type: 'failed'; message: string; rescued?: FinishedRecording };
 
 export const initialRecordingState: RecordingState = { status: 'idle' };
 
@@ -34,13 +42,44 @@ export function recordingReducer(state: RecordingState, event: RecordingEvent): 
       return state.status === 'starting' ? { ...state, status: 'recording' } : state;
     case 'stop':
       return state.status === 'recording' ? { ...state, status: 'stopping' } : state;
+    case 'interrupted':
+      // While recording: stop now. While starting: remember it, the hook stops
+      // the take as soon as it has started. The first cause wins.
+      if (state.status === 'recording') {
+        return { ...state, status: 'stopping', interruptedBy: state.interruptedBy ?? event.cause };
+      }
+      if (state.status === 'starting') {
+        return { ...state, interruptedBy: state.interruptedBy ?? event.cause };
+      }
+      // Idle: nothing to stop. Stopping: the user already ended the take.
+      return state;
     case 'finished':
       // Also accepted while 'recording': the recorder can finish on its own
       // (max duration/size, or the OS stopping it).
-      return { status: 'idle', lastRecording: event.recording };
+      return {
+        status: 'idle',
+        lastRecording: withInterruption(event.recording, state.interruptedBy),
+      };
     case 'failed':
-      return { ...state, status: 'idle', error: event.message };
+      if (event.rescued) {
+        return {
+          status: 'idle',
+          lastRecording: withInterruption(
+            event.rescued,
+            state.interruptedBy ?? event.rescued.interruptedBy ?? 'recording-error',
+          ),
+        };
+      }
+      return { ...state, status: 'idle', error: event.message, interruptedBy: undefined };
   }
+}
+
+function withInterruption(
+  recording: FinishedRecording,
+  cause: InterruptionCause | undefined,
+): FinishedRecording {
+  const interruptedBy = cause ?? recording.interruptedBy;
+  return interruptedBy ? { ...recording, interruptedBy } : recording;
 }
 
 export const canStartRecording = (state: RecordingState) => state.status === 'idle';

@@ -157,8 +157,18 @@ Claude bu dosyayı **yukarıdan aşağıya** işler. Sıra önemlidir; bir işin
 
 ## Sprint 5 · Sağlamlık
 
-- [ ] **PRM-23** Kesinti yönetimi — CİHAZ
+- [~] **PRM-23** Kesinti yönetimi — CİHAZ
   - Kabul: arama gelince / arka plana geçince kayıt güvenle duruyor, dosya bozulmuyor.
+  - Durum: uygulama arka plana geçince (Android'de tam ekran gelen arama da buraya düşer) kayıt `stopRecording` ile düzgünce durdurulur; kamera oturumu dosya bitene kadar açık tutulur. iOS'ta arama/FaceTime/Siri mikrofonu alınca VisionCamera'nın kesinti olayı (`audio-device-in-use-by-another-client`) aynı yolu tetikler. iOS kesintide kaydı "hata" ile bitirse bile dosya diskteyse kurtarılıp galeriye kaydedilir. Arka planda biten kayıt, uygulamaya dönülünce galeriye yazılır; uygulama arka planda öldürülürse bir sonraki Kayıt ekranı açılışında kaydedilir (yol MMKV'de bekletilir). Geri sayım sırasında arka plana geçilirse geri sayım iptal olur. Ekranda: "Kayıt kesildi — video "Prompter" albümüne kaydedildi". iOS `inactive` (Kontrol Merkezi, arama bildirimi bandı) kaydı durdurmaz.
+  - Mantık saf fonksiyonlarda (`interruption.ts`, `recording.ts` reducer, `saveNotice`) + Recorder entegrasyon testleri.
+  - Bilinen sınır: Android'de küçük (heads-up) arama bildirimi uygulamayı arka plana atmaz; aramayı açarsan Android mikrofonu aramaya verir ve kayıt sessiz devam edebilir. Bunu yakalamak için `READ_PHONE_STATE` izni gerekir — eklenmedi, cihaz testinde görülürse karar verilecek.
+  - Cihazda nasıl test edilir (yeni build gerekmez, dev build/APK güncellemesi yeterli):
+    1. Kayıt → kayda başla, ~10 sn konuş → ana ekrana çık (home hareketi), 5 sn bekle, uygulamaya dön.
+    2. Ekranda "Kayıt kesildi — video "Prompter" albümüne kaydedildi" görünmeli; galeride ~10 sn'lik video oynamalı, sonu bozuk olmamalı.
+    3. Kayıt sırasında başka bir telefondan seni ara. Android: aramayı aç/kapat, uygulamaya dön → bildirim + video galeride olmalı (heads-up bildirimde sesin kesilip kesilmediğini not et). iPhone: aynı.
+    4. Kayıt sırasında uygulama değiştiriciye geç, uygulamayı yukarı kaydırıp öldür → uygulamayı tekrar aç → Kayıt sekmesi → bildirim çıkmalı ve video galeriye eklenmeli.
+    5. Geri sayım (3-2-1) sırasında ana ekrana çık, dön → kayıt başlamamış olmalı.
+    6. iPhone: kayıt sırasında Kontrol Merkezi'ni aç/kapat → kayıt devam etmeli.
 - [ ] **PRM-24** Depolama ve ısı uyarıları — CİHAZ
   - Kabul: kayıt öncesi boş alan kontrolü; az alanda ve ısınmada uyarı.
 - [ ] **PRM-25** Bluetooth kumanda / klavye — CİHAZ

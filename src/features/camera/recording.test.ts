@@ -79,3 +79,76 @@ describe('formatDuration', () => {
     expect(formatDuration(-3)).toBe('00:00');
   });
 });
+
+describe('interruptions', () => {
+  const recording: RecordingEvent[] = [{ type: 'start' }, { type: 'started' }];
+
+  it('stops a running take and flags the finished file', () => {
+    const stopping = run([...recording, { type: 'interrupted', cause: 'app-background' }]);
+    expect(stopping).toMatchObject({ status: 'stopping', interruptedBy: 'app-background' });
+
+    const done = run([finished], stopping);
+    expect(done).toEqual({
+      status: 'idle',
+      lastRecording: { path: '/tmp/a.mp4', durationSeconds: 12, interruptedBy: 'app-background' },
+    });
+  });
+
+  it('keeps the first cause when several arrive', () => {
+    const state = run([
+      ...recording,
+      { type: 'interrupted', cause: 'audio-in-use' },
+      { type: 'interrupted', cause: 'app-background' },
+    ]);
+    expect(state.interruptedBy).toBe('audio-in-use');
+  });
+
+  it('remembers an interruption that arrives while the recorder is starting', () => {
+    const state = run([{ type: 'start' }, { type: 'interrupted', cause: 'app-background' }]);
+    expect(state).toMatchObject({ status: 'starting', interruptedBy: 'app-background' });
+  });
+
+  it('ignores interruptions while idle or after the user pressed stop', () => {
+    expect(run([{ type: 'interrupted', cause: 'app-background' }])).toEqual(initialRecordingState);
+    const stopped = run([
+      ...recording,
+      { type: 'stop' },
+      { type: 'interrupted', cause: 'app-background' },
+    ]);
+    expect(stopped.interruptedBy).toBeUndefined();
+    expect(run([finished], stopped).lastRecording?.interruptedBy).toBeUndefined();
+  });
+
+  it('keeps a rescued file from a take that errored, without an error message', () => {
+    const rescued = { path: '/tmp/b.mp4', durationSeconds: 30 };
+    const state = run([
+      ...recording,
+      { type: 'interrupted', cause: 'audio-in-use' },
+      { type: 'failed', message: 'Session was interrupted', rescued },
+    ]);
+    expect(state).toEqual({
+      status: 'idle',
+      lastRecording: { ...rescued, interruptedBy: 'audio-in-use' },
+    });
+  });
+
+  it('marks a rescued take without a known cause as a recording error', () => {
+    const state = run([
+      ...recording,
+      { type: 'failed', message: 'boom', rescued: { path: '/tmp/c.mp4', durationSeconds: 3 } },
+    ]);
+    expect(state.lastRecording?.interruptedBy).toBe('recording-error');
+    expect(state.error).toBeUndefined();
+  });
+
+  it('starts the next take clean', () => {
+    const state = run([
+      ...recording,
+      { type: 'interrupted', cause: 'app-background' },
+      finished,
+      { type: 'start' },
+    ]);
+    expect(state.status).toBe('starting');
+    expect(state.interruptedBy).toBeUndefined();
+  });
+});
