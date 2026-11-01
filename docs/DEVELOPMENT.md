@@ -34,7 +34,7 @@ JS changes still hot-reload from Metro.
      ignores long paths. Install _Android SDK Command-line Tools_ in SDK Manager, then:
      `sdkmanager --install "cmake;3.31.6"` and add to `android/local.properties`:
      `cmake.dir=C\:/Users/<name>/AppData/Local/Android/Sdk/cmake/3.31.6`
-     (forward slashes; re-add after `npx expo prebuild --clean` regenerates `android/`).
+     (forward slashes; re-add after any `npx expo prebuild`, which regenerates `android/`).
 
 ### Prepare the phone (USB debugging)
 

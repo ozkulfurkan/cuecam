@@ -58,8 +58,10 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
     },
     predictiveBackGestureEnabled: false,
   },
+  // Scoped under `ios`: unscoped keys would also become Android strings.xml entries
+  // with no default-locale value, which fails Android's release lint (ExtraTranslation).
   locales: {
-    tr: { ...permissions.tr, CFBundleDisplayName: 'Cue Cam' },
+    tr: { ios: { ...permissions.tr, CFBundleDisplayName: 'Cue Cam' } },
   },
   web: {
     output: 'server',
