@@ -86,8 +86,11 @@ Claude bu dosyayı **yukarıdan aşağıya** işler. Sıra önemlidir; bir işin
     5. Ayarlar → Uygulamalar → Cue Cam → İzinler → Fotoğraflar ve videolar → "İzin verme"; yeni kayıt → "Not saved…" mesajı + "Open Settings" düğmesi.
     6. Eski Android (9 veya altı) cihaz varsa aynı adımlar: izin penceresi "dosyalara erişim" olarak görünür.
     7. iOS: Apple hesabı gelince aynı adımlar; Fotoğraflar → Albümler → "Prompter".
-- [ ] **PRM-11** Ön kamera ayna ayarı — CİHAZ
+- [!] **PRM-11** Ön kamera ayna ayarı — CİHAZ
   - Kabul: önizleme aynalı; kaydın aynalı olup olmayacağı seçilebiliyor.
+  - Ertelendi (Furkan, 2026-11-02): seçenek şimdilik eklenmeyecek, ihtiyaç olursa sonra. Karar: kayıt aynasız olmalı (önizleme aynalı kalır).
+  - Şu anki durum: önizleme ön kamerada aynalı (`mirrorMode="auto"`). Kaydedilen dosyanın aynalı olup olmadığı telefonda kontrol edilmeli: üzerinde yazı olan bir şeyle ön kamerada çek, galeride yazı düz okunuyor mu?
+  - Uygulama notu: VisionCamera'nın `Camera` bileşeni tek bir `mirrorMode`'u önizleme ve kayda birlikte uygular. Aynasız kayıt + aynalı önizleme için kamera `mirrorMode="off"` çalıştırılıp yalnızca önizleme görünümü yatayda çevrilebilir (Android'de `implementationMode="compatible"` gerekir).
 
 ## Sprint 3 · Prompter motoru (MVP)
 
