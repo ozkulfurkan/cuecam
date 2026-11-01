@@ -13,6 +13,7 @@ export {
   iconSize,
   opacity,
   radius,
+  recordButtonSize,
   sliderSize,
   spacing,
   textStyles,

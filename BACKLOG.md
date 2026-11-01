@@ -64,8 +64,16 @@ Claude bu dosyayı **yukarıdan aşağıya** işler. Sıra önemlidir; bir işin
     3. Sağ üstteki düğmeyle arka kameraya geç → "30 fps · back"; tekrar bas → ön kamera.
     4. Ana ekrana çık, 5 sn bekle, geri dön → görüntü donmadan devam etmeli; telefonda kamera göstergesi arka planda sönmüş olmalı.
     5. Sol üstteki X ile kapat → ana ekran.
-- [ ] **PRM-9** Video ve ses kaydı — CİHAZ
+- [~] **PRM-9** Video ve ses kaydı — CİHAZ
   - Kabul: başlat/durdur, süre sayacı, 1080p, ses senkron.
+  - Durum: alt ortada kayıt düğmesi, üstte kırmızı süre sayacı; video + ses aynı dosyaya (1080p hedef, 30 fps). Kayıt sürerken kamera değiştirme, Kapat ve geri tuşu kilitli. Dosya şimdilik uygulamanın geçici klasöründe (galeriye kaydetme PRM-10).
+  - Emülatörde ölçülen: 19,9 sn kayıt; görüntü 19,88 sn / ses 19,90 sn (fark 20 ms), ~29 fps. Çözünürlük 720p ve ses AMR 8 kHz çıktı — emülatörün kayıt profilleri en fazla 720p ve yalnızca AMR tanımlıyor; 1080p ve AAC ses gerçek telefonda doğrulanmalı.
+  - Cihazda nasıl test edilir (dev build veya yeni APK):
+    1. Kayıt → kırmızı daireye bas → üstte 00:00'dan sayan kırmızı sayaç; düğme kareye döner, X ve kamera değiştirme gizlenir.
+    2. Kayıt sürerken telefonun geri tuşu/hareketi ekranı kapatmamalı.
+    3. Saniyeyi yüksek sesle sayarak ~20 sn konuş, kareye basıp durdur → dev build'de altta "Recorded 00:20 → …mp4" görünür.
+    4. Galeriye kaydetme PRM-10'da geldiğinde: videoyu aç, dudak hareketi ile ses aynı anda olmalı; video bilgisinde 1080×1920 görünmeli, ses net (telefon kalitesi değil) olmalı.
+    5. Arka arkaya 3 kısa kayıt al; her biri ayrı dosya olmalı, uygulama donmamalı.
 - [ ] **PRM-10** Galeriye kaydetme — CİHAZ
   - Kabul: video "Prompter" albümünde; eski Android, yeni Android ve iOS'ta çalışıyor.
 - [ ] **PRM-11** Ön kamera ayna ayarı — CİHAZ

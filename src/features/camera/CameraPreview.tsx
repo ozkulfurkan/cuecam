@@ -1,18 +1,25 @@
 import { useState } from 'react';
 import { StyleSheet, Text, View } from 'react-native';
-import { Camera, useCameraDevice, useCameraDevices } from 'react-native-vision-camera';
+import {
+  Camera,
+  useCameraDevice,
+  useCameraDevices,
+  type CameraOutput,
+} from 'react-native-vision-camera';
 
-import { radius, spacing, textStyles, useTheme } from '@/theme';
+import { radius, spacing, textStyles, touchTarget, useTheme } from '@/theme';
 
 import { previewConstraints, resolvePosition, type LensPosition } from './preview';
 import { useIsCameraActive } from './useIsCameraActive';
 
 type Props = {
   position: LensPosition;
+  /** Extra outputs on the same session, e.g. the video recorder. */
+  outputs?: CameraOutput[];
 };
 
 /** Full-screen live camera feed. The front camera is mirrored, like a mirror. */
-export function CameraPreview({ position }: Props) {
+export function CameraPreview({ position, outputs }: Props) {
   const { colors } = useTheme();
   const isActive = useIsCameraActive();
   const positions = useCameraDevices().map((device) => device.position);
@@ -34,6 +41,7 @@ export function CameraPreview({ position }: Props) {
         style={StyleSheet.absoluteFill}
         device={device}
         isActive={isActive}
+        outputs={outputs}
         constraints={previewConstraints}
         // 'auto' mirrors selfie cameras on both platforms. Whether the recorded
         // file is mirrored becomes a setting in PRM-11.
@@ -62,7 +70,8 @@ const styles = StyleSheet.create({
   center: { alignItems: 'center', justifyContent: 'center' },
   fps: {
     position: 'absolute',
-    bottom: spacing.xl,
+    // Below the top row of controls, clear of the record button at the bottom.
+    top: touchTarget + spacing.xl * 2,
     alignSelf: 'center',
     paddingHorizontal: spacing.sm,
     paddingVertical: spacing.xs,

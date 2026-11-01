@@ -1,24 +1,64 @@
-import { useState } from 'react';
-import { StyleSheet, View } from 'react-native';
-import { useCameraDevices } from 'react-native-vision-camera';
+import { useEffect, useMemo, useState } from 'react';
+import { StyleSheet, Text, View } from 'react-native';
+import { CommonResolutions, useCameraDevices, useVideoOutput } from 'react-native-vision-camera';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { IconButton } from '@/components/IconButton';
-import { spacing } from '@/theme';
+import { radius, spacing, textStyles, useTheme } from '@/theme';
 
 import { CameraPreview } from './CameraPreview';
 import { canSwitchPosition, DEFAULT_POSITION, otherPosition, type LensPosition } from './preview';
+import { RecordButton } from './RecordButton';
+import { formatDuration, isRecordingBusy } from './recording';
+import { useVideoRecording } from './useVideoRecording';
 
-/** Live preview with camera controls. Recording controls arrive in PRM-9. */
-export function Recorder() {
+type Props = {
+  /** Reports when recording starts/ends so the screen can lock its own controls. */
+  onBusyChange?: (busy: boolean) => void;
+};
+
+/** Live preview with lens switch, record button and elapsed time. */
+export function Recorder({ onBusyChange }: Props) {
+  const { colors } = useTheme();
   const [position, setPosition] = useState<LensPosition>(DEFAULT_POSITION);
   const canSwitch = canSwitchPosition(useCameraDevices().map((device) => device.position));
 
+  // 1080p video with audio in the same file; the recorder keeps them in sync.
+  const videoOutput = useVideoOutput({
+    targetResolution: CommonResolutions.FHD_16_9,
+    enableAudio: true,
+  });
+  // A stable array: a new one each render would reconfigure the camera session
+  // on every timer tick while recording.
+  const outputs = useMemo(() => [videoOutput], [videoOutput]);
+  const { state, elapsedSeconds, start, stop } = useVideoRecording(videoOutput);
+  const busy = isRecordingBusy(state);
+  const isRecording = state.status === 'recording';
+
+  useEffect(() => {
+    onBusyChange?.(busy);
+  }, [busy, onBusyChange]);
+
   return (
     <View style={StyleSheet.absoluteFill}>
-      <CameraPreview position={position} />
-      <SafeAreaView edges={['top']} style={styles.controls} pointerEvents="box-none">
-        {canSwitch ? (
+      <CameraPreview position={position} outputs={outputs} />
+
+      <SafeAreaView edges={['top']} style={styles.top} pointerEvents="box-none">
+        {busy ? (
+          <View
+            accessibilityRole="timer"
+            accessibilityLabel={`Recording, ${formatDuration(elapsedSeconds)}`}
+            style={[styles.timer, { backgroundColor: colors.record }]}
+          >
+            <Text style={[textStyles.label, { color: colors.onRecord }]}>
+              {formatDuration(elapsedSeconds)}
+            </Text>
+          </View>
+        ) : null}
+      </SafeAreaView>
+
+      <SafeAreaView edges={['top']} style={styles.topRight} pointerEvents="box-none">
+        {canSwitch && !busy ? (
           <IconButton
             icon={{ ios: 'arrow.triangle.2.circlepath.camera', android: 'cameraswitch' }}
             accessibilityLabel={
@@ -28,15 +68,77 @@ export function Recorder() {
           />
         ) : null}
       </SafeAreaView>
+
+      <SafeAreaView edges={['bottom']} style={styles.bottom} pointerEvents="box-none">
+        {state.error ? (
+          <Text
+            style={[
+              textStyles.caption,
+              styles.notice,
+              { color: colors.onRecord, backgroundColor: colors.record },
+            ]}
+          >
+            {`Recording failed: ${state.error}`}
+          </Text>
+        ) : null}
+        {__DEV__ && state.lastRecording && !busy ? (
+          // Dev-only until PRM-10 saves recordings to the gallery.
+          <Text
+            style={[
+              textStyles.caption,
+              styles.notice,
+              { color: colors.text, backgroundColor: colors.surface },
+            ]}
+          >
+            {`Recorded ${formatDuration(state.lastRecording.durationSeconds)} → ${state.lastRecording.path}`}
+          </Text>
+        ) : null}
+        <RecordButton
+          isRecording={isRecording}
+          disabled={state.status === 'starting' || state.status === 'stopping'}
+          onPress={isRecording ? stop : start}
+        />
+      </SafeAreaView>
     </View>
   );
 }
 
 const styles = StyleSheet.create({
-  controls: {
+  top: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    alignItems: 'center',
+    padding: spacing.md,
+  },
+  timer: {
+    marginTop: spacing.sm,
+    paddingHorizontal: spacing.md,
+    paddingVertical: spacing.xs,
+    borderRadius: radius.pill,
+    justifyContent: 'center',
+  },
+  topRight: {
     position: 'absolute',
     top: 0,
     right: 0,
     padding: spacing.md,
+  },
+  bottom: {
+    position: 'absolute',
+    left: 0,
+    right: 0,
+    bottom: 0,
+    alignItems: 'center',
+    gap: spacing.md,
+    padding: spacing.lg,
+  },
+  notice: {
+    paddingHorizontal: spacing.sm,
+    paddingVertical: spacing.xs,
+    borderRadius: radius.sm,
+    overflow: 'hidden',
+    textAlign: 'center',
   },
 });

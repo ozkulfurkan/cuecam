@@ -42,6 +42,13 @@ export const sliderSize = {
   thumbBorder: 2,
 } as const;
 
+export const recordButtonSize = {
+  outer: 76,
+  ring: 4,
+  dot: 60,
+  stop: 30,
+} as const;
+
 export const textStyles = {
   title: { fontSize: fontSize.title, lineHeight: 34, fontWeight: '700' },
   subtitle: { fontSize: fontSize.subtitle, lineHeight: 26, fontWeight: '600' },
