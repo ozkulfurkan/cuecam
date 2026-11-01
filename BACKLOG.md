@@ -21,25 +21,16 @@ Claude bu dosyayı **yukarıdan aşağıya** işler. Sıra önemlidir; bir işin
 
 - [x] **PRM-1** Expo + TypeScript projesi — BULUT
   - Kabul: proje kurulu, ESLint/Prettier, `typecheck`/`lint`/`test` script'leri hatasız.
-- [~] **PRM-2** Development build — CİHAZ, FURKAN
+- [x] **PRM-2** Development build — CİHAZ, FURKAN
   - Kabul: expo-dev-client kurulu; `app.config.ts` hazır; uygulama Android telefonda açılıyor.
   - Furkan'dan: uygulama adı, paket adı (ör. `com.termoland.prompter`).
-  - Durum: ad `Cue Cam`, paket `com.ozkulfurkan.cuecam`; Android emülatörde (API 37) açılıyor.
-  - Cihazda nasıl test edilir:
-    1. Telefonda USB hata ayıklamayı aç, kabloyla bağla; `adb devices` telefonu `device` olarak göstermeli.
-    2. `npx expo run:android --device` → telefonu seç (ilk derleme birkaç dakika).
-    3. Uygulama "Cue Cam" adıyla açılmalı: koyu splash → koyu ekranda "Cue Cam / Prompter".
-    4. Metro'yu kapatıp `npm start` ile tekrar aç; uygulama yeniden bağlanabilmeli.
+  - Durum: ad `Cue Cam`, paket `com.ozkulfurkan.cuecam`; Android emülatörde (API 37) ve Furkan'ın telefonunda (EAS preview APK) açılıyor, 3 sekme görünüyor.
 - [~] **PRM-3** EAS Build profilleri — CİHAZ, FURKAN
   - Kabul: `eas.json` (development, preview, production); Android preview APK telefona kuruluyor; iOS internal distribution.
   - Furkan'dan: `eas login`, gerekirse EXPO_TOKEN.
-  - Durum: EAS projesi `@ozkulfurkan/cuecam`; Android keystore EAS'te; ilk preview derlemesi başlatıldı.
-  - Ertelendi: iOS internal distribution — Apple Developer hesabı alınınca yapılacak.
-  - Cihazda nasıl test edilir:
-    1. https://expo.dev/accounts/ozkulfurkan/projects/cuecam/builds adresinde son "preview" Android derlemesini aç.
-    2. Telefonda QR kodu okut veya "Install" bağlantısını aç, APK'yı indir.
-    3. "Bilinmeyen kaynaklardan yükleme" izni sorulursa tarayıcıya izin ver, kur.
-    4. Uygulama Metro olmadan kendi başına açılmalı: koyu ekranda "Cue Cam / Prompter".
+  - Durum: EAS projesi `@ozkulfurkan/cuecam`; Android keystore EAS'te.
+  - ✅ Android: preview APK telefona kuruldu, bilgisayarsız açılıyor (Furkan doğruladı).
+  - Ertelendi: iOS internal distribution — Apple Developer hesabı alınınca yapılacak; o zamana kadar madde `[~]` kalır.
 - [x] **PRM-4** Navigasyon iskeleti — BULUT
   - Kabul: Senaryolar / Kayıt / Ayarlar sekmeleri; Kayıt tam ekran ayrı yığın; render testi geçiyor.
 - [x] **PRM-5** Tasarım sistemi — BULUT, FURKAN
