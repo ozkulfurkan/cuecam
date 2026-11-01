@@ -69,6 +69,8 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
   },
   plugins: [
     'expo-router',
+    // Uploads source maps on EAS builds; the token comes from SENTRY_AUTH_TOKEN.
+    ['@sentry/react-native/expo', { organization: 'ozkulfurkan', project: 'cuecam' }],
     [
       'expo-splash-screen',
       {

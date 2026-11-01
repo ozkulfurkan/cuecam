@@ -4,11 +4,16 @@ import {
   Stack,
   ThemeProvider as NavigationThemeProvider,
 } from 'expo-router';
+import * as Sentry from '@sentry/react-native';
 import { StatusBar } from 'expo-status-bar';
 import { StyleSheet } from 'react-native';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 
+import { buildSentryOptions } from '@/lib/monitoring';
 import { ThemeProvider, useTheme } from '@/theme';
+
+// Initialised before the first render so startup crashes are reported too.
+Sentry.init(buildSentryOptions({ dsn: process.env.EXPO_PUBLIC_SENTRY_DSN, isDev: __DEV__ }));
 
 function RootStack() {
   const { scheme, colors } = useTheme();
@@ -38,7 +43,7 @@ function RootStack() {
   );
 }
 
-export default function RootLayout() {
+function RootLayout() {
   return (
     <GestureHandlerRootView style={styles.root}>
       <ThemeProvider>
@@ -47,6 +52,8 @@ export default function RootLayout() {
     </GestureHandlerRootView>
   );
 }
+
+export default Sentry.wrap(RootLayout);
 
 const styles = StyleSheet.create({
   root: { flex: 1 },
