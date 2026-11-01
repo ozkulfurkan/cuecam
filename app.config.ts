@@ -35,7 +35,9 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
   slug: 'cuecam',
   owner: 'ozkulfurkan',
   version: '1.0.0',
-  orientation: 'portrait',
+  // Rotation is allowed at the native level so the recorder can film in
+  // landscape; every other screen is locked to portrait at runtime (APP_LOCK).
+  orientation: 'default',
   icon: './assets/images/icon.png',
   scheme: 'cuecam',
   userInterfaceStyle: 'dark',

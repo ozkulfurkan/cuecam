@@ -1,12 +1,13 @@
 import { usePreventRemove, useRouter } from 'expo-router';
-import { StatusBar } from 'expo-status-bar';
-import { useState } from 'react';
-import { StyleSheet, View } from 'react-native';
+import { setStatusBarHidden, StatusBar } from 'expo-status-bar';
+import { useEffect, useState } from 'react';
+import { AppState, StyleSheet, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { IconButton } from '@/components/IconButton';
 import { CameraPermissionGate } from '@/features/camera/CameraPermissionGate';
 import { Recorder } from '@/features/camera/Recorder';
+import { useRecorderOrientationLock } from '@/features/camera/useRecorderOrientationLock';
 import { spacing, useTheme } from '@/theme';
 
 // Full-screen recorder: the live camera fills the screen once permissions are
@@ -21,6 +22,18 @@ export default function RecordScreen() {
   // router calls — until the recording has stopped; the user stops it first.
   usePreventRemove(recording, () => {});
 
+  // Follows the phone while idle; frozen from the countdown to the end of a recording.
+  useRecorderOrientationLock(recording);
+
+  // Android shows the status bar again after the app returns from the
+  // background (or a system dialog); hide it again. iOS keeps it hidden.
+  useEffect(() => {
+    const subscription = AppState.addEventListener('change', (state) => {
+      if (state === 'active') setStatusBarHidden(true, 'none');
+    });
+    return () => subscription.remove();
+  }, []);
+
   return (
     <View style={[styles.root, { backgroundColor: colors.background }]}>
       <StatusBar hidden />
@@ -28,7 +41,7 @@ export default function RecordScreen() {
         <Recorder onBusyChange={setRecording} />
       </CameraPermissionGate>
       {recording ? null : (
-        <SafeAreaView edges={['top']} style={styles.close} pointerEvents="box-none">
+        <SafeAreaView edges={['top', 'left']} style={styles.close} pointerEvents="box-none">
           <IconButton
             icon={{ ios: 'xmark', android: 'close' }}
             accessibilityLabel="Close"

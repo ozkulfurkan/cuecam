@@ -113,8 +113,19 @@ Claude bu dosyayı **yukarıdan aşağıya** işler. Sıra önemlidir; bir işin
 - [x] **PRM-15** Geri sayım ve dokununca duraklat — BULUT
   - Kabul: 3-2-1 sonrası kayıt ve akış birlikte başlıyor; dokunma akışı durduruyor.
   - Durum: kayıt düğmesi 3-2-1 sayar (sırasında düğmeyle iptal edilebilir), sonra kayıt başlar; metin yalnızca kayıt gerçekten başladığında akar. Metne dokunmak akışı duraklatır/sürdürür ("Paused · tap the text to continue"), kayıt devam eder. Testli ve emülatörde doğrulandı.
-- [ ] **PRM-16** Ekran yönü kilidi — CİHAZ
+- [~] **PRM-16** Ekran yönü kilidi — CİHAZ
   - Kabul: yön kayıt başında sabit; video doğru yönde.
+  - Karar (Furkan, 2026-11-02): dikey + yatay kayıt desteklenecek.
+  - Durum: uygulama dikey; yalnız Kayıt ekranı telefonla döner. Geri sayım başladığı anda o anki yönde kilitlenir, kayıt bitince serbest kalır, ekran kapanınca uygulama dikeye döner. Video yönü ekrandan alınır (`orientationSource="interface"`). Yatayda yazı kutusu kameranın olduğu kenara, kontroller karşı tarafa geçer. Yön/kilit/yerleşim saf fonksiyonlar + testler.
+  - Emülatörde: ana ekran döndürmede dikey kaldı; Kayıt yataya döndü (kamera solda → kutu solda); yatayda kayıt sırasında telefon dikeye çevrilince ekran yatay kaldı; dosya `orientation=270` (yatay oynatılır), dikey kayıtlar `orientation=0`.
+  - Ayrıca: arka plandan dönünce görünen durum çubuğu artık Kayıt ekranında yeniden gizleniyor.
+  - Cihazda nasıl test edilir:
+    1. Telefonun otomatik döndürmesi açık olsun. Ana ekranda telefonu yan çevir → ekran dikey kalmalı.
+    2. Kayıt'a gir, telefonu sola ve sağa yatır → ekran dönmeli; yazı kutusu her seferinde ön kameranın olduğu kenarda olmalı (kamera solda ise kutu solda).
+    3. Yatayda kayda başla, kayıt sırasında telefonu dikey çevir → ekran yatay kalmalı. Durdur → ekran tekrar dönebilmeli.
+    4. Galeride yatay videoyu aç: yatay ve DÜZ (baş aşağı değil) oynamalı. Aynısını telefonu diğer yöne yatırarak tekrarla.
+    5. Dikey kayıt da dikey ve düz oynamalı.
+    6. Kayıt ekranını X ile kapat → uygulama dikeye dönmeli.
 
 ## Sprint 4 · Senaryolar ve ayarlar
 
@@ -164,4 +175,4 @@ Claude bu dosyayı **yukarıdan aşağıya** işler. Sıra önemlidir; bir işin
 
 (Cihaz testinde çıkan hatalar buraya `BUG-<no>` olarak eklenir ve ilgili sprintin sonuna sıralanır.)
 
-- Gözlem (PRM-8, Android emülatör): Kayıt ekranında uygulama arka plandan dönünce gizli durum çubuğu yeniden görünüyor. PRM-16 (ekran yönü / tam ekran kaydı) kapsamında ele alınacak.
+- Gözlem (PRM-8, Android emülatör): Kayıt ekranında uygulama arka plandan dönünce gizli durum çubuğu yeniden görünüyor. → PRM-16'da düzeltildi (öne gelince yeniden gizleniyor); telefonda doğrulanmalı.

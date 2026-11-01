@@ -48,6 +48,10 @@ export function CameraPreview({ position, outputs }: Props) {
         // 'auto' mirrors selfie cameras on both platforms. Whether the recorded
         // file is mirrored becomes a setting in PRM-11.
         mirrorMode="auto"
+        // Video orientation follows the screen. The screen is locked for the
+        // length of a recording (useRecorderOrientationLock), so the file keeps
+        // the orientation it started in even if the phone is turned mid-take.
+        orientationSource="interface"
         resizeMode="cover"
         onSessionConfigSelected={(config) => setSelectedFps(config.selectedFPS)}
       />

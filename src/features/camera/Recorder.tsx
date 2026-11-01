@@ -5,7 +5,7 @@ import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context'
 
 import { Button } from '@/components/Button';
 import { IconButton } from '@/components/IconButton';
-import { prompterBox } from '@/features/prompter/layout';
+import { controlsArea, prompterBox } from '@/features/prompter/layout';
 import { Prompter } from '@/features/prompter/Prompter';
 import { PrompterControls } from '@/features/prompter/PrompterControls';
 import { SAMPLE_SCRIPT } from '@/features/prompter/sampleScript';
@@ -15,10 +15,12 @@ import { fontSize, radius, spacing, textStyles, touchTarget, useTheme } from '@/
 
 import { CameraPreview } from './CameraPreview';
 import { saveResultMessage, type SaveResult } from './gallery';
+import { cameraSideFor } from './orientation';
 import { canSwitchPosition, DEFAULT_POSITION, otherPosition, type LensPosition } from './preview';
 import { RecordButton } from './RecordButton';
 import { formatDuration, isRecordingBusy, type FinishedRecording } from './recording';
 import { saveToGallery } from './saveToGallery';
+import { useInterfaceOrientation } from './useInterfaceOrientation';
 import { useVideoRecording } from './useVideoRecording';
 
 type SaveStatus = { kind: 'saving' } | SaveResult;
@@ -33,6 +35,7 @@ export function Recorder({ onBusyChange }: Props) {
   const { colors } = useTheme();
   const insets = useSafeAreaInsets();
   const window = useWindowDimensions();
+  const orientation = useInterfaceOrientation();
   const [position, setPosition] = useState<LensPosition>(DEFAULT_POSITION);
   const canSwitch = canSwitchPosition(useCameraDevices().map((device) => device.position));
 
@@ -80,12 +83,23 @@ export function Recorder({ onBusyChange }: Props) {
     }
   };
 
-  // Directly under the top row of buttons, as close to the front lens as possible.
+  // Next to the front lens: under the top row of buttons in portrait, against
+  // the camera edge in landscape (see layout.ts).
+  const cameraSide = cameraSideFor(orientation);
   const box = prompterBox({
     screenWidth: window.width,
     screenHeight: window.height,
+    cameraSide,
     topOffset: insets.top + spacing.md + touchTarget + spacing.sm,
+    bottomOffset: insets.bottom + spacing.lg,
+    sideOffset: (cameraSide === 'left' ? insets.left : insets.right) + spacing.md,
   });
+  const controls = controlsArea(box, cameraSide, window.width, spacing.md);
+  const pausedLabelTop = Math.min(
+    box.top + box.height + spacing.sm,
+    // In landscape the box reaches the bottom; keep the label on screen.
+    window.height - insets.bottom - spacing.xl - spacing.md,
+  );
 
   return (
     <View style={StyleSheet.absoluteFill}>
@@ -107,7 +121,10 @@ export function Recorder({ onBusyChange }: Props) {
             styles.notice,
             styles.pausedLabel,
             {
-              top: box.top + box.height + spacing.sm,
+              top: pausedLabelTop,
+              // Centered under the text box (in landscape it sits to one side).
+              left: box.left,
+              width: box.width,
               color: colors.onScrim,
               backgroundColor: colors.scrim,
             },
@@ -142,7 +159,7 @@ export function Recorder({ onBusyChange }: Props) {
         ) : null}
       </SafeAreaView>
 
-      <SafeAreaView edges={['top']} style={styles.topRight} pointerEvents="box-none">
+      <SafeAreaView edges={['top', 'right']} style={styles.topRight} pointerEvents="box-none">
         {canSwitch && !busy ? (
           <IconButton
             icon={{ ios: 'arrow.triangle.2.circlepath.camera', android: 'cameraswitch' }}
@@ -154,7 +171,12 @@ export function Recorder({ onBusyChange }: Props) {
         ) : null}
       </SafeAreaView>
 
-      <SafeAreaView edges={['bottom']} style={styles.bottom} pointerEvents="box-none">
+      <SafeAreaView
+        edges={['bottom', 'left', 'right']}
+        // Full width in portrait; the side away from the camera in landscape.
+        style={[styles.bottom, { left: controls.left, right: controls.right }]}
+        pointerEvents="box-none"
+      >
         {state.error ? (
           <Text
             style={[
@@ -243,7 +265,6 @@ const styles = StyleSheet.create({
   },
   pausedLabel: {
     position: 'absolute',
-    alignSelf: 'center',
   },
   countdown: {
     position: 'absolute',

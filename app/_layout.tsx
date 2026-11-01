@@ -6,10 +6,12 @@ import {
   ThemeProvider as NavigationThemeProvider,
 } from 'expo-router';
 import * as Sentry from '@sentry/react-native';
+import { lockAsync } from 'expo-screen-orientation';
 import { StatusBar } from 'expo-status-bar';
 import { StyleSheet } from 'react-native';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 
+import { APP_LOCK } from '@/features/camera/orientation';
 import { buildSentryOptions } from '@/lib/monitoring';
 import { ThemeProvider, useTheme } from '@/theme';
 
@@ -20,6 +22,10 @@ Sentry.init(buildSentryOptions({ dsn: process.env.EXPO_PUBLIC_SENTRY_DSN, isDev:
 // Sentry listens on. This boundary (it also covers every nested route) reports
 // them, with the current route attached, and shows Expo Router's retry screen.
 export const ErrorBoundary = Sentry.wrapExpoRouterErrorBoundary(ExpoErrorBoundary);
+
+// app.config.ts allows rotation for the recorder; everything else is portrait.
+// The recorder unlocks itself while open (useRecorderOrientationLock).
+lockAsync(APP_LOCK).catch(Sentry.captureException);
 
 function RootStack() {
   const { scheme, colors } = useTheme();
