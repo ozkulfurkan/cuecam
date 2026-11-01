@@ -129,18 +129,31 @@ Claude bu dosyayı **yukarıdan aşağıya** işler. Sıra önemlidir; bir işin
 
 ## Sprint 4 · Senaryolar ve ayarlar
 
-- [ ] **PRM-17** Senaryo listesi ve editör — BULUT
+- [x] **PRM-17** Senaryo listesi ve editör — BULUT
   - Kabul: ekle, düzenle, sil, ara; başlık + metin.
-- [ ] **PRM-18** Yerel depolama — BULUT
+  - Durum: Senaryolar sekmesi (arama, en son düzenlenen üstte, satırdan doğrudan kayıt); editör (başlık + metin, her tuşta kaydeder, silme onayı, boş bırakılan yeni senaryo atılır). Kayıt sekmesi en son kullanılan senaryoyu açar; senaryo yoksa örnek metin. Arama Türkçe/aksan duyarsız. Testli, emülatörde denendi.
+- [x] **PRM-18** Yerel depolama — BULUT
   - Kabul: senaryolar ve ayarlar uygulama kapanınca kaybolmuyor (MMKV).
-- [ ] **PRM-19** Metin içe aktarma — BULUT
+  - Durum: senaryolar `scripts.v1` anahtarında (bozuk veri uygulamayı çökertmez), son kullanılan senaryo, hız/boyut, kalite ve dil MMKV'de. Ekranlar ortak bir depoya abone; bir ekrandaki değişiklik diğerlerine anında yansır. Testli.
+- [x] **PRM-19** Metin içe aktarma — BULUT
   - Kabul: panodan yapıştırma ve .txt seçme.
-- [ ] **PRM-20** Ayarlar ekranı — BULUT
+  - Durum: editörde "Yapıştır" (panodaki metni sona ekler; pano boşsa uyarı) ve ".txt içe aktar" (sona ekler; başlık boşsa dosya adından). Windows satır sonları/BOM temizlenir. Emülatörde .txt içe aktarma Türkçe karakterlerle denendi; yapıştırma telefonda denenmeli (emülatöre pano verisi gönderilemedi).
+- [x] **PRM-20** Ayarlar ekranı — BULUT
   - Kabul: varsayılan hız, yazı boyutu, ayna, kalite (720p/1080p/4K), dil.
-- [ ] **PRM-21** Okuma süresi tahmini — BULUT
+  - Durum: hız ve boyut (kayıt ekranıyla aynı değerler), kayıt kalitesi 720p/1080p/4K (kamera desteklemezse en yakını), dil Sistem/English/Türkçe (anında uygulanır, hatırlanır). Tüm arayüz TR/EN; eksik çeviri test ile yakalanır.
+  - Ayna seçeneği yok: PRM-11 ertelendi.
+- [x] **PRM-21** Okuma süresi tahmini — BULUT
   - Kabul: kelime sayısı ve hızdan tahmini süre; hesap fonksiyonu test edilmiş.
-- [ ] **PRM-22** Kayıtlar ekranı — CİHAZ
+  - Durum: liste ve editörde "29 kelime · Hız 10 ile ~00:05". Hız 4 ≈ 150 kelime/dk, akış motoruyla aynı tanım. Testli.
+- [~] **PRM-22** Kayıtlar ekranı — CİHAZ
   - Kabul: uygulamayla çekilen videolar listeleniyor, oynatılıyor, paylaşılıyor.
+  - Durum: Kayıtlar sekmesi "Prompter" albümünü listeler (en yeni üstte, tarih + süre), her açılışta yenilenir; dokununca tam ekran oynatıcı (sistem kontrolleriyle), paylaş düğmesi sistem paylaşım menüsünü açar. Emülatörde: 8 kayıt listelendi, yatay video doğru yönde oynadı, paylaşım menüsü .mp4 ile açıldı.
+  - Not: expo-media-library dokümanı süreyi "saniye" diyor ama iki platform da milisaniye döndürüyor; kaynak koddan doğrulandı ve buna göre çevriliyor.
+  - Cihazda nasıl test edilir:
+    1. Birkaç kısa video çek, Kayıtlar sekmesine geç → en yeni üstte, süreleri doğru olmalı.
+    2. Bir kayda dokun → tam ekran oynamalı, ses gelmeli; X ile kapan.
+    3. Paylaş → WhatsApp/Drive gibi bir uygulamaya gönder; video karşı tarafta oynamalı.
+    4. Galeri iznini kapatıp Kayıtlar'a gel → "İzin ver" düğmesi çıkmalı.
 
 ## Sprint 5 · Sağlamlık
 
