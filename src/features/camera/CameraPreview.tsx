@@ -8,6 +8,7 @@ import {
 } from 'react-native-vision-camera';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
+import { useI18n } from '@/i18n/I18nProvider';
 import { radius, spacing, textStyles, touchTarget, useTheme } from '@/theme';
 
 import { previewConstraints, resolvePosition, type LensPosition } from './preview';
@@ -22,6 +23,7 @@ type Props = {
 /** Full-screen live camera feed. The front camera is mirrored, like a mirror. */
 export function CameraPreview({ position, outputs }: Props) {
   const { colors } = useTheme();
+  const { t } = useI18n();
   const insets = useSafeAreaInsets();
   const isActive = useIsCameraActive();
   const positions = useCameraDevices().map((device) => device.position);
@@ -32,7 +34,7 @@ export function CameraPreview({ position, outputs }: Props) {
   if (lens === undefined || device === undefined) {
     return (
       <View style={[styles.fill, styles.center, { backgroundColor: colors.background }]}>
-        <Text style={[textStyles.body, { color: colors.textMuted }]}>No camera available</Text>
+        <Text style={[textStyles.body, { color: colors.textMuted }]}>{t('recorder.noCamera')}</Text>
       </View>
     );
   }

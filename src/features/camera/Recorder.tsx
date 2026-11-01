@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from 'react';
 import { Linking, StyleSheet, Text, useWindowDimensions, View } from 'react-native';
-import { CommonResolutions, useCameraDevices, useVideoOutput } from 'react-native-vision-camera';
+import { useCameraDevices, useVideoOutput } from 'react-native-vision-camera';
 import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { Button } from '@/components/Button';
@@ -8,9 +8,10 @@ import { IconButton } from '@/components/IconButton';
 import { controlsArea, prompterBox } from '@/features/prompter/layout';
 import { Prompter } from '@/features/prompter/Prompter';
 import { PrompterControls } from '@/features/prompter/PrompterControls';
-import { SAMPLE_SCRIPT } from '@/features/prompter/sampleScript';
 import { useCountdown } from '@/features/prompter/useCountdown';
 import { usePrompterSettings } from '@/features/prompter/usePrompterSettings';
+import { useI18n } from '@/i18n/I18nProvider';
+import { loadVideoQuality } from '@/storage/appSettings';
 import { fontSize, radius, spacing, textStyles, touchTarget, useTheme } from '@/theme';
 
 import { CameraPreview } from './CameraPreview';
@@ -18,6 +19,7 @@ import { saveResultMessage, type SaveResult } from './gallery';
 import { cameraSideFor } from './orientation';
 import { canSwitchPosition, DEFAULT_POSITION, otherPosition, type LensPosition } from './preview';
 import { RecordButton } from './RecordButton';
+import { resolutionFor } from './videoQuality';
 import { formatDuration, isRecordingBusy, type FinishedRecording } from './recording';
 import { saveToGallery } from './saveToGallery';
 import { useInterfaceOrientation } from './useInterfaceOrientation';
@@ -26,22 +28,27 @@ import { useVideoRecording } from './useVideoRecording';
 type SaveStatus = { kind: 'saving' } | SaveResult;
 
 type Props = {
+  /** The script shown in the prompter. */
+  text: string;
   /** Reports when recording starts/ends so the screen can lock its own controls. */
   onBusyChange?: (busy: boolean) => void;
 };
 
 /** Live preview with the prompter, its controls, the record button and elapsed time. */
-export function Recorder({ onBusyChange }: Props) {
+export function Recorder({ text, onBusyChange }: Props) {
   const { colors } = useTheme();
+  const { t } = useI18n();
   const insets = useSafeAreaInsets();
   const window = useWindowDimensions();
   const orientation = useInterfaceOrientation();
   const [position, setPosition] = useState<LensPosition>(DEFAULT_POSITION);
   const canSwitch = canSwitchPosition(useCameraDevices().map((device) => device.position));
 
-  // 1080p video with audio in the same file; the recorder keeps them in sync.
+  // Video with audio in the same file; the recorder keeps them in sync. The
+  // resolution comes from Settings (read once per visit to the recorder).
+  const [quality] = useState(loadVideoQuality);
   const videoOutput = useVideoOutput({
-    targetResolution: CommonResolutions.FHD_16_9,
+    targetResolution: resolutionFor(quality),
     enableAudio: true,
   });
   // A stable array: a new one each render would reconfigure the camera session
@@ -106,7 +113,7 @@ export function Recorder({ onBusyChange }: Props) {
       <CameraPreview position={position} outputs={outputs} />
 
       <Prompter
-        text={SAMPLE_SCRIPT}
+        text={text}
         box={box}
         speed={settings.speed}
         fontSize={settings.fontSize}
@@ -130,7 +137,7 @@ export function Recorder({ onBusyChange }: Props) {
             },
           ]}
         >
-          Paused · tap the text to continue
+          {t('recorder.paused')}
         </Text>
       ) : null}
 
@@ -149,7 +156,7 @@ export function Recorder({ onBusyChange }: Props) {
         {isRecordingBusy(state) ? (
           <View
             accessibilityRole="timer"
-            accessibilityLabel={`Recording, ${formatDuration(elapsedSeconds)}`}
+            accessibilityLabel={t('recorder.timer', { time: formatDuration(elapsedSeconds) })}
             style={[styles.timer, { backgroundColor: colors.record }]}
           >
             <Text style={[textStyles.label, { color: colors.onRecord }]}>
@@ -163,9 +170,9 @@ export function Recorder({ onBusyChange }: Props) {
         {canSwitch && !busy ? (
           <IconButton
             icon={{ ios: 'arrow.triangle.2.circlepath.camera', android: 'cameraswitch' }}
-            accessibilityLabel={
-              position === 'front' ? 'Switch to back camera' : 'Switch to front camera'
-            }
+            accessibilityLabel={t(
+              position === 'front' ? 'recorder.switchToBack' : 'recorder.switchToFront',
+            )}
             onPress={() => setPosition(otherPosition)}
           />
         ) : null}
@@ -185,7 +192,7 @@ export function Recorder({ onBusyChange }: Props) {
               { color: colors.onRecord, backgroundColor: colors.record },
             ]}
           >
-            {`Recording failed: ${state.error}`}
+            {t('recorder.failed', { error: state.error })}
           </Text>
         ) : null}
         {saveStatus && !busy ? (
@@ -197,12 +204,12 @@ export function Recorder({ onBusyChange }: Props) {
               { color: colors.text, backgroundColor: colors.surface },
             ]}
           >
-            {saveStatus.kind === 'saving' ? 'Saving to gallery…' : saveResultMessage(saveStatus)}
+            {saveStatus.kind === 'saving' ? t('recorder.saving') : saveResultMessage(saveStatus, t)}
           </Text>
         ) : null}
         {saveStatus?.kind === 'permission-denied' && saveStatus.canOpenSettings && !busy ? (
           <Button
-            label="Open Settings"
+            label={t('common.openSettings')}
             variant="secondary"
             // Opens this app's page in system Settings on both iOS and Android.
             onPress={() => Linking.openSettings()}
@@ -216,7 +223,7 @@ export function Recorder({ onBusyChange }: Props) {
         />
         <RecordButton
           isRecording={isRecording || countdown.isRunning}
-          label={countdown.isRunning ? 'Cancel countdown' : undefined}
+          label={countdown.isRunning ? t('recorder.cancelCountdown') : undefined}
           disabled={state.status === 'starting' || state.status === 'stopping'}
           onPress={onRecordPress}
         />

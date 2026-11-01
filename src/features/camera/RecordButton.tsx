@@ -1,5 +1,6 @@
 import { Pressable, StyleSheet, View } from 'react-native';
 
+import { useI18n } from '@/i18n/I18nProvider';
 import { opacity, radius, recordButtonSize, useTheme } from '@/theme';
 
 type Props = {
@@ -13,11 +14,12 @@ type Props = {
 /** Classic shutter: a red dot to start, a red square to stop. */
 export function RecordButton({ isRecording, label, disabled = false, onPress }: Props) {
   const { colors } = useTheme();
+  const { t } = useI18n();
 
   return (
     <Pressable
       accessibilityRole="button"
-      accessibilityLabel={label ?? (isRecording ? 'Stop recording' : 'Start recording')}
+      accessibilityLabel={label ?? t(isRecording ? 'recorder.stop' : 'recorder.start')}
       accessibilityState={{ disabled }}
       disabled={disabled}
       onPress={onPress}

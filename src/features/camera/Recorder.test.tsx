@@ -47,7 +47,7 @@ function renderRecorder(onBusyChange?: (busy: boolean) => void) {
   return render(
     <GestureHandlerRootView>
       <SafeAreaProvider initialMetrics={METRICS}>
-        <Recorder onBusyChange={onBusyChange} />
+        <Recorder text="Test script text" onBusyChange={onBusyChange} />
       </SafeAreaProvider>
     </GestureHandlerRootView>,
   );

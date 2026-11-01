@@ -1,3 +1,5 @@
+import { translate } from '@/i18n/translate';
+
 import {
   describePermissions,
   missingPermissions,
@@ -5,6 +7,11 @@ import {
   requestablePermissions,
   type PermissionStatuses,
 } from './permissions';
+
+const en = (key: Parameters<typeof translate>[1], params?: Parameters<typeof translate>[2]) =>
+  translate('en', key, params);
+const tr = (key: Parameters<typeof translate>[1], params?: Parameters<typeof translate>[2]) =>
+  translate('tr', key, params);
 
 const both = (
   camera: PermissionStatuses['camera'],
@@ -55,9 +62,10 @@ describe('requestablePermissions', () => {
 });
 
 describe('describePermissions', () => {
-  it('joins labels for user-facing text', () => {
-    expect(describePermissions(['camera'])).toBe('Camera');
-    expect(describePermissions(['microphone'])).toBe('Microphone');
-    expect(describePermissions(['camera', 'microphone'])).toBe('Camera and Microphone');
+  it('joins translated labels for user-facing text', () => {
+    expect(describePermissions(['camera'], en)).toBe('Camera');
+    expect(describePermissions(['microphone'], en)).toBe('Microphone');
+    expect(describePermissions(['camera', 'microphone'], en)).toBe('Camera and Microphone');
+    expect(describePermissions(['camera', 'microphone'], tr)).toBe('Kamera ve Mikrofon');
   });
 });

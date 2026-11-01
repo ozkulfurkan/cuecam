@@ -6,6 +6,7 @@ import Animated, {
   useSharedValue,
 } from 'react-native-reanimated';
 
+import { useI18n } from '@/i18n/I18nProvider';
 import { radius, spacing, useTheme } from '@/theme';
 
 import type { PrompterBox } from './layout';
@@ -29,6 +30,7 @@ type Props = {
  */
 export function Prompter({ text, box, speed, fontSize, playing, restartKey, onPress }: Props) {
   const { colors } = useTheme();
+  const { t } = useI18n();
   const offset = useSharedValue(0);
   const pxPerSecond = useSharedValue(pixelsPerSecond(speed, fontSize));
   const isPlaying = useSharedValue(playing);
@@ -74,8 +76,8 @@ export function Prompter({ text, box, speed, fontSize, playing, restartKey, onPr
   return (
     <Pressable
       accessibilityRole="button"
-      accessibilityLabel="Script"
-      accessibilityHint={playing ? 'Pauses scrolling' : 'Resumes scrolling'}
+      accessibilityLabel={t('recorder.script')}
+      accessibilityHint={t(playing ? 'recorder.pauseHint' : 'recorder.resumeHint')}
       onPress={onPress}
       style={[
         styles.box,

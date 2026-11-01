@@ -1,3 +1,5 @@
+import type { Translate } from '@/i18n/translate';
+
 /** Product rule: every recording lands in this gallery album. */
 export const ALBUM_NAME = 'Prompter';
 
@@ -30,15 +32,13 @@ export type SaveResult =
   | { kind: 'permission-denied'; canOpenSettings: boolean }
   | { kind: 'failed'; message: string };
 
-export function saveResultMessage(result: SaveResult): string {
+export function saveResultMessage(result: SaveResult, t: Translate): string {
   switch (result.kind) {
     case 'saved':
-      return `Saved to the "${ALBUM_NAME}" album`;
+      return t('recorder.saved', { album: ALBUM_NAME });
     case 'permission-denied':
-      return result.canOpenSettings
-        ? 'Not saved: allow Photos access in Settings to save recordings'
-        : 'Not saved: Photos access was not allowed';
+      return t(result.canOpenSettings ? 'recorder.notSavedSettings' : 'recorder.notSavedDenied');
     case 'failed':
-      return `Not saved: ${result.message}`;
+      return t('recorder.notSavedError', { error: result.message });
   }
 }

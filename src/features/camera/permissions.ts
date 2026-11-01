@@ -1,5 +1,8 @@
 import type { PermissionStatus } from 'react-native-vision-camera';
 
+import type { StringKey } from '@/i18n/en';
+import type { Translate } from '@/i18n/translate';
+
 export type RecordingPermission = 'camera' | 'microphone';
 
 export type PermissionStatuses = Record<RecordingPermission, PermissionStatus>;
@@ -39,12 +42,16 @@ export function requestablePermissions(statuses: PermissionStatuses): RecordingP
   return ORDER.filter((permission) => statuses[permission] === 'not-determined');
 }
 
-const LABELS: Record<RecordingPermission, string> = {
-  camera: 'Camera',
-  microphone: 'Microphone',
-};
+const LABEL_KEYS = {
+  camera: 'permissions.camera',
+  microphone: 'permissions.microphone',
+} as const satisfies Record<RecordingPermission, StringKey>;
 
-/** "Camera", "Microphone" or "Camera and Microphone", for user-facing copy. */
-export function describePermissions(permissions: readonly RecordingPermission[]): string {
-  return permissions.map((permission) => LABELS[permission]).join(' and ');
+/** "Camera", "Microphone" or "Camera and Microphone" (translated), for user-facing copy. */
+export function describePermissions(
+  permissions: readonly RecordingPermission[],
+  t: Translate,
+): string {
+  const [first, second] = permissions.map((permission) => t(LABEL_KEYS[permission]));
+  return second === undefined ? (first ?? '') : t('permissions.and', { first, second });
 }

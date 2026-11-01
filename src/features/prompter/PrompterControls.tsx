@@ -1,6 +1,7 @@
 import { StyleSheet, Text, View } from 'react-native';
 
 import { Slider } from '@/components/Slider';
+import { useI18n } from '@/i18n/I18nProvider';
 import { radius, spacing, textStyles, useTheme } from '@/theme';
 
 import { FONT_SIZE_RANGE, SPEED_RANGE } from './scroll';
@@ -15,12 +16,13 @@ type Props = {
 /** Speed and text-size sliders. Usable while recording; changes apply at once. */
 export function PrompterControls({ speed, fontSize, onSpeedChange, onFontSizeChange }: Props) {
   const { colors } = useTheme();
+  const { t } = useI18n();
   const labelStyle = [textStyles.caption, styles.label, { color: colors.onScrim }];
 
   return (
     <View style={[styles.panel, { backgroundColor: colors.scrim }]}>
       <View style={styles.row}>
-        <Text style={labelStyle}>{`Speed ${speed}`}</Text>
+        <Text style={labelStyle}>{t('prompter.speed', { value: speed })}</Text>
         <View style={styles.slider}>
           <Slider
             value={speed}
@@ -28,12 +30,12 @@ export function PrompterControls({ speed, fontSize, onSpeedChange, onFontSizeCha
             max={SPEED_RANGE.max}
             step={SPEED_RANGE.step}
             onChange={onSpeedChange}
-            accessibilityLabel="Scroll speed"
+            accessibilityLabel={t('prompter.speedLabel')}
           />
         </View>
       </View>
       <View style={styles.row}>
-        <Text style={labelStyle}>{`Size ${fontSize}`}</Text>
+        <Text style={labelStyle}>{t('prompter.size', { value: fontSize })}</Text>
         <View style={styles.slider}>
           <Slider
             value={fontSize}
@@ -41,7 +43,7 @@ export function PrompterControls({ speed, fontSize, onSpeedChange, onFontSizeCha
             max={FONT_SIZE_RANGE.max}
             step={FONT_SIZE_RANGE.step}
             onChange={onFontSizeChange}
-            accessibilityLabel="Text size"
+            accessibilityLabel={t('prompter.sizeLabel')}
           />
         </View>
       </View>

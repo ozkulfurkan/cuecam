@@ -1,4 +1,9 @@
+import { translate } from '@/i18n/translate';
+
 import { ALBUM_NAME, galleryPermissionStep, saveResultMessage, toFileUri } from './gallery';
+
+const en = (key: Parameters<typeof translate>[1], params?: Parameters<typeof translate>[2]) =>
+  translate('en', key, params);
 
 it('saves into the "Prompter" album', () => {
   expect(ALBUM_NAME).toBe('Prompter');
@@ -37,11 +42,11 @@ describe('galleryPermissionStep', () => {
 
 describe('saveResultMessage', () => {
   it('describes each outcome', () => {
-    expect(saveResultMessage({ kind: 'saved' })).toBe('Saved to the "Prompter" album');
-    expect(saveResultMessage({ kind: 'permission-denied', canOpenSettings: true })).toMatch(
+    expect(saveResultMessage({ kind: 'saved' }, en)).toBe('Saved to the "Prompter" album');
+    expect(saveResultMessage({ kind: 'permission-denied', canOpenSettings: true }, en)).toMatch(
       /Settings/,
     );
-    expect(saveResultMessage({ kind: 'failed', message: 'disk full' })).toBe(
+    expect(saveResultMessage({ kind: 'failed', message: 'disk full' }, en)).toBe(
       'Not saved: disk full',
     );
   });

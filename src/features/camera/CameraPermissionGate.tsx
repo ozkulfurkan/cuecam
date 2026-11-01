@@ -2,6 +2,8 @@ import type { ReactNode } from 'react';
 import { StyleSheet, Text, View } from 'react-native';
 
 import { Button } from '@/components/Button';
+import { useI18n } from '@/i18n/I18nProvider';
+import type { Translate } from '@/i18n/translate';
 import { spacing, textStyles, useTheme } from '@/theme';
 
 import { describePermissions, type PermissionStep, type RecordingPermission } from './permissions';
@@ -9,23 +11,24 @@ import { useRecordingPermissions } from './useRecordingPermissions';
 
 type Copy = { title: string; body: string };
 
-function copyFor(step: Exclude<PermissionStep, 'ready'>, missing: RecordingPermission[]): Copy {
-  const names = describePermissions(missing);
+function copyFor(
+  step: Exclude<PermissionStep, 'ready'>,
+  missing: RecordingPermission[],
+  t: Translate,
+): Copy {
+  const names = describePermissions(missing, t);
   switch (step) {
     case 'request':
-      return {
-        title: 'Camera and microphone',
-        body: 'Cue Cam records video and sound while you read your script. Allow access to start recording.',
-      };
+      return { title: t('permissions.requestTitle'), body: t('permissions.requestBody') };
     case 'open-settings':
       return {
-        title: `${names} access is off`,
-        body: `Turn on ${names} for Cue Cam in Settings, then come back here.`,
+        title: t('permissions.offTitle', { names }),
+        body: t('permissions.offBody', { names }),
       };
     case 'restricted':
       return {
-        title: `${names} is restricted`,
-        body: `This device blocks ${names} access (for example Screen Time or a device policy). It can only be changed by whoever manages the device.`,
+        title: t('permissions.restrictedTitle', { names }),
+        body: t('permissions.restrictedBody', { names }),
       };
   }
 }
@@ -37,11 +40,12 @@ type Props = {
 /** Renders `children` only once camera and microphone are both granted. */
 export function CameraPermissionGate({ children }: Props) {
   const { colors } = useTheme();
+  const { t } = useI18n();
   const { step, missing, request, openSettings } = useRecordingPermissions();
 
   if (step === 'ready') return children;
 
-  const copy = copyFor(step, missing);
+  const copy = copyFor(step, missing, t);
 
   return (
     <View style={styles.container}>
@@ -53,10 +57,10 @@ export function CameraPermissionGate({ children }: Props) {
       </Text>
       <Text style={[textStyles.body, styles.center, { color: colors.textMuted }]}>{copy.body}</Text>
       {step === 'request' ? (
-        <Button label="Allow access" onPress={request} style={styles.action} />
+        <Button label={t('permissions.allow')} onPress={request} style={styles.action} />
       ) : null}
       {step === 'open-settings' ? (
-        <Button label="Open Settings" onPress={openSettings} style={styles.action} />
+        <Button label={t('common.openSettings')} onPress={openSettings} style={styles.action} />
       ) : null}
     </View>
   );
