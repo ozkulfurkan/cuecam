@@ -20,6 +20,8 @@ export const fontSize = {
   body: 16,
   subtitle: 20,
   title: 28,
+  /** Full-screen numbers, e.g. the recording countdown. */
+  display: 120,
 } as const;
 
 export const iconSize = {

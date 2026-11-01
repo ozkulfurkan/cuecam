@@ -6,6 +6,7 @@ import {
   useCameraDevices,
   type CameraOutput,
 } from 'react-native-vision-camera';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { radius, spacing, textStyles, touchTarget, useTheme } from '@/theme';
 
@@ -21,6 +22,7 @@ type Props = {
 /** Full-screen live camera feed. The front camera is mirrored, like a mirror. */
 export function CameraPreview({ position, outputs }: Props) {
   const { colors } = useTheme();
+  const insets = useSafeAreaInsets();
   const isActive = useIsCameraActive();
   const positions = useCameraDevices().map((device) => device.position);
   const lens = resolvePosition(position, positions);
@@ -55,6 +57,9 @@ export function CameraPreview({ position, outputs }: Props) {
           style={[
             textStyles.caption,
             styles.fps,
+            // In the top row, right of the Close button: clear of the prompter
+            // box below it and the controls at the bottom.
+            { top: insets.top + spacing.md + spacing.sm },
             { color: colors.text, backgroundColor: colors.surface },
           ]}
         >
@@ -70,9 +75,7 @@ const styles = StyleSheet.create({
   center: { alignItems: 'center', justifyContent: 'center' },
   fps: {
     position: 'absolute',
-    // Below the top row of controls, clear of the record button at the bottom.
-    top: touchTarget + spacing.xl * 2,
-    alignSelf: 'center',
+    left: spacing.md * 2 + touchTarget,
     paddingHorizontal: spacing.sm,
     paddingVertical: spacing.xs,
     borderRadius: radius.sm,

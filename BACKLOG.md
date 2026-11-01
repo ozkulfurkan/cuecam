@@ -94,14 +94,25 @@ Claude bu dosyayı **yukarıdan aşağıya** işler. Sıra önemlidir; bir işin
 
 ## Sprint 3 · Prompter motoru (MVP)
 
-- [ ] **PRM-12** Akan yazı motoru — CİHAZ
+- [~] **PRM-12** Akan yazı motoru — CİHAZ
   - Kabul: akış Reanimated ile UI thread'de; kamera ve kayıt açıkken takılma yok. Hız→piksel/sn hesabı saf fonksiyon + test.
-- [ ] **PRM-13** Hız ve yazı boyutu kontrolleri — BULUT
+  - Durum: `useFrameCallback` ile her karede UI thread'de ilerliyor (JS zamanlayıcısı yok); hız seviyesi satır/sn'ye bağlı (yazı büyüyünce aynı okuma temposu). `pixelsPerSecond`, `advanceOffset`, `maxScrollOffset` saf ve testli. Metin şimdilik örnek senaryo (PRM-17'ye kadar).
+  - Emülatörde: kayıt + kamera açıkken akış sürekli; hız 8'de ~1 satır/sn ölçüldü. Bulunan ve düzeltilen iki hata: worklet olmayan fonksiyon çağrısı (çökme) ve metin yüksekliğinin kutuya sıkışması (akış duruyordu).
+  - Cihazda nasıl test edilir:
+    1. Kayıt → kırmızı düğme → 3-2-1 → metin akmaya başlamalı.
+    2. 1 dakika boyunca akışı izle: takılma, sıçrama, titreme olmamalı (özellikle kayıt başladığı anda ve ilk saniyelerde).
+    3. Kaydı galeride aç: prompter metni videoda görünmemeli.
+- [~] **PRM-13** Hız ve yazı boyutu kontrolleri — BULUT
   - Kabul: kayıt sırasında kaydırıcıyla değişiyor; son değer MMKV'de hatırlanıyor.
-- [ ] **PRM-14** Lens altı yerleşim — CİHAZ
+  - Durum: altta "Speed 1–10" ve "Size 24–64" kaydırıcıları; kayıt sırasında da çalışıyor, değişiklik bir sonraki karede uygulanıyor. Değerler MMKV'de; uygulama kapatılıp açılınca geri geliyor (emülatörde doğrulandı, testli).
+  - Not: Kod tarafı tamam; `[x]` yerine `[~]` çünkü kayıt sırasında kaydırıcının akışı takıltmadığı telefonda görülmeli.
+- [~] **PRM-14** Lens altı yerleşim — CİHAZ
   - Kabul: yazı ekranın üstünde, kameraya yakın, dar sütun, yarı saydam zemin.
-- [ ] **PRM-15** Geri sayım ve dokununca duraklat — BULUT
+  - Durum: kutu üst düğme satırının hemen altında, ekran genişliğinin ~%72'si (240–420 dp), yüksekliğin ~%30'u, yarı saydam siyah zemin. Yerleşim hesabı saf fonksiyon + test.
+  - Cihazda: kayıtta metne bakarken çekilen videoda gözler kameraya bakıyor gibi görünmeli; çentikli/delikli ekranda kutu ön kameranın altında kalmalı.
+- [x] **PRM-15** Geri sayım ve dokununca duraklat — BULUT
   - Kabul: 3-2-1 sonrası kayıt ve akış birlikte başlıyor; dokunma akışı durduruyor.
+  - Durum: kayıt düğmesi 3-2-1 sayar (sırasında düğmeyle iptal edilebilir), sonra kayıt başlar; metin yalnızca kayıt gerçekten başladığında akar. Metne dokunmak akışı duraklatır/sürdürür ("Paused · tap the text to continue"), kayıt devam eder. Testli ve emülatörde doğrulandı.
 - [ ] **PRM-16** Ekran yönü kilidi — CİHAZ
   - Kabul: yön kayıt başında sabit; video doğru yönde.
 

@@ -1,7 +1,12 @@
 import { act, fireEvent, render, screen } from '@testing-library/react-native';
 import * as mediaLibraryModule from 'expo-media-library';
-import * as visionCameraModule from 'react-native-vision-camera';
+import { StyleSheet } from 'react-native';
+import { GestureHandlerRootView } from 'react-native-gesture-handler';
+import * as reanimatedModule from 'react-native-reanimated';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
+import * as visionCameraModule from 'react-native-vision-camera';
+
+import { storage } from '@/storage/storage';
 
 import { Recorder } from './Recorder';
 
@@ -25,6 +30,11 @@ const mediaLibrary = mediaLibraryModule as unknown as {
   mockGallery: { albums: Map<string, string[]> };
 };
 
+// Helper from __mocks__/react-native-reanimated.ts.
+const reanimated = reanimatedModule as unknown as {
+  mockRunFrames: (count: number, frameMs?: number) => void;
+};
+
 jest.mock('expo-router', () => ({ useIsFocused: () => true }));
 jest.mock('@sentry/react-native', () => ({ captureException: jest.fn() }));
 
@@ -35,9 +45,11 @@ const METRICS = {
 
 function renderRecorder(onBusyChange?: (busy: boolean) => void) {
   return render(
-    <SafeAreaProvider initialMetrics={METRICS}>
-      <Recorder onBusyChange={onBusyChange} />
-    </SafeAreaProvider>,
+    <GestureHandlerRootView>
+      <SafeAreaProvider initialMetrics={METRICS}>
+        <Recorder onBusyChange={onBusyChange} />
+      </SafeAreaProvider>
+    </GestureHandlerRootView>,
   );
 }
 
@@ -45,6 +57,26 @@ const cameraProps = () => screen.getByTestId('camera').props;
 const latestRecorder = () => visionCamera.mockRecorders[visionCamera.mockRecorders.length - 1];
 const pressButton = (name: string | RegExp) =>
   fireEvent.press(screen.getByRole('button', { name }));
+
+/** Presses record and lets the 3-2-1 countdown run out. */
+async function startRecording() {
+  await pressButton('Start recording');
+  await act(() => jest.advanceTimersByTime(3200));
+}
+
+/** Current prompter scroll offset (the text moves up as it scrolls). */
+function prompterOffset() {
+  const scroller = screen.getByTestId('prompter-text').parent!;
+  const { transform } = StyleSheet.flatten(scroller.props.style) as {
+    transform: { translateY: number }[];
+  };
+  return -transform[0].translateY;
+}
+
+beforeEach(() => {
+  jest.useFakeTimers();
+  storage.clearAll();
+});
 
 afterEach(() => {
   visionCamera.setMockDevices(['front', 'back']);
@@ -102,14 +134,43 @@ describe('recording', () => {
     });
   });
 
-  it('starts, counts elapsed time, and stops', async () => {
-    jest.useFakeTimers();
+  it('counts down 3-2-1 before recording starts', async () => {
     const onBusyChange = jest.fn();
     await renderRecorder(onBusyChange);
 
     await pressButton('Start recording');
-    expect(screen.getByRole('button', { name: 'Stop recording' })).toBeTruthy();
+    expect(screen.getByText('3')).toBeTruthy();
     expect(onBusyChange).toHaveBeenLastCalledWith(true);
+    expect(visionCamera.mockRecorders).toHaveLength(0);
+
+    await act(() => jest.advanceTimersByTime(1000));
+    expect(screen.getByText('2')).toBeTruthy();
+    await act(() => jest.advanceTimersByTime(1000));
+    expect(screen.getByText('1')).toBeTruthy();
+    await act(() => jest.advanceTimersByTime(1100));
+
+    expect(visionCamera.mockRecorders).toHaveLength(1);
+    expect(screen.getByRole('button', { name: 'Stop recording' })).toBeTruthy();
+  });
+
+  it('can cancel the countdown without recording', async () => {
+    const onBusyChange = jest.fn();
+    await renderRecorder(onBusyChange);
+
+    await pressButton('Start recording');
+    await pressButton('Cancel countdown');
+    await act(() => jest.advanceTimersByTime(4000));
+
+    expect(visionCamera.mockRecorders).toHaveLength(0);
+    expect(onBusyChange).toHaveBeenLastCalledWith(false);
+    expect(screen.getByRole('button', { name: 'Start recording' })).toBeTruthy();
+  });
+
+  it('counts elapsed time and stops', async () => {
+    const onBusyChange = jest.fn();
+    await renderRecorder(onBusyChange);
+
+    await startRecording();
     // Lens switch is locked while recording.
     expect(screen.queryByRole('button', { name: /Switch to/ })).toBeNull();
 
@@ -127,7 +188,7 @@ describe('recording', () => {
   it('saves the finished recording to the Prompter album', async () => {
     await renderRecorder();
 
-    await pressButton('Start recording');
+    await startRecording();
     const recorder = latestRecorder();
     await pressButton('Stop recording');
     await act(() => recorder.finishNow());
@@ -142,7 +203,7 @@ describe('recording', () => {
     mediaLibrary.setMockGalleryPermission({ granted: false, canAskAgain: false });
     await renderRecorder();
 
-    await pressButton('Start recording');
+    await startRecording();
     await pressButton('Stop recording');
     await act(() => latestRecorder().finishNow());
 
@@ -153,10 +214,10 @@ describe('recording', () => {
   it('uses a new recorder (and file) for each recording', async () => {
     await renderRecorder();
 
-    await pressButton('Start recording');
+    await startRecording();
     await pressButton('Stop recording');
     await act(() => latestRecorder().finishNow());
-    await pressButton('Start recording');
+    await startRecording();
 
     expect(visionCamera.mockRecorders).toHaveLength(2);
   });
@@ -164,10 +225,77 @@ describe('recording', () => {
   it('shows the error and allows a retry when recording fails', async () => {
     await renderRecorder();
 
-    await pressButton('Start recording');
+    await startRecording();
     await act(() => latestRecorder().failNow('Camera is in use'));
 
     expect(screen.getByText('Recording failed: Camera is in use')).toBeTruthy();
     expect(screen.getByRole('button', { name: 'Start recording' })).toBeTruthy();
+  });
+});
+
+describe('prompter', () => {
+  async function layoutScript() {
+    const scroller = screen.getByTestId('prompter-text').parent!;
+    await fireEvent(scroller, 'layout', { nativeEvent: { layout: { height: 5000 } } });
+  }
+
+  async function runFramesAndRender() {
+    await act(() => reanimated.mockRunFrames(10, 100));
+    // The mocked animated style is only computed on render; nudge the recorded
+    // duration so the elapsed-time poll re-renders the screen.
+    const recorder = latestRecorder();
+    if (recorder) recorder.recordedDuration += 1;
+    await act(() => jest.advanceTimersByTime(300));
+  }
+
+  it('does not scroll before or during the countdown', async () => {
+    await renderRecorder();
+    await layoutScript();
+
+    await runFramesAndRender();
+    await pressButton('Start recording');
+    await runFramesAndRender();
+
+    expect(prompterOffset()).toBe(0);
+  });
+
+  it('scrolls once recording starts and pauses on tap', async () => {
+    await renderRecorder();
+    await layoutScript();
+    await startRecording();
+
+    await runFramesAndRender();
+    const scrolled = prompterOffset();
+    expect(scrolled).toBeGreaterThan(0);
+
+    await pressButton('Script');
+    expect(screen.getByText('Paused · tap the text to continue')).toBeTruthy();
+    await runFramesAndRender();
+    expect(prompterOffset()).toBe(scrolled);
+
+    await pressButton('Script');
+    await runFramesAndRender();
+    expect(prompterOffset()).toBeGreaterThan(scrolled);
+  });
+
+  it('remembers speed and text size across launches', async () => {
+    const first = await renderRecorder();
+    await fireEvent(
+      screen.getByRole('adjustable', { name: 'Scroll speed' }),
+      'accessibilityAction',
+      {
+        nativeEvent: { actionName: 'increment' },
+      },
+    );
+    await fireEvent(screen.getByRole('adjustable', { name: 'Text size' }), 'accessibilityAction', {
+      nativeEvent: { actionName: 'decrement' },
+    });
+    expect(screen.getByText('Speed 5')).toBeTruthy();
+    expect(screen.getByText('Size 34')).toBeTruthy();
+    await first.unmount();
+
+    await renderRecorder();
+    expect(screen.getByText('Speed 5')).toBeTruthy();
+    expect(screen.getByText('Size 34')).toBeTruthy();
   });
 });

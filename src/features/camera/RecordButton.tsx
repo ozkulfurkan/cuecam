@@ -4,18 +4,20 @@ import { opacity, radius, recordButtonSize, useTheme } from '@/theme';
 
 type Props = {
   isRecording: boolean;
+  /** Overrides the default "Start/Stop recording" label, e.g. during the countdown. */
+  label?: string;
   disabled?: boolean;
   onPress: () => void;
 };
 
 /** Classic shutter: a red dot to start, a red square to stop. */
-export function RecordButton({ isRecording, disabled = false, onPress }: Props) {
+export function RecordButton({ isRecording, label, disabled = false, onPress }: Props) {
   const { colors } = useTheme();
 
   return (
     <Pressable
       accessibilityRole="button"
-      accessibilityLabel={isRecording ? 'Stop recording' : 'Start recording'}
+      accessibilityLabel={label ?? (isRecording ? 'Stop recording' : 'Start recording')}
       accessibilityState={{ disabled }}
       disabled={disabled}
       onPress={onPress}

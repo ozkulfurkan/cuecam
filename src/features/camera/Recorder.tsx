@@ -1,11 +1,17 @@
 import { useEffect, useMemo, useState } from 'react';
-import { Linking, StyleSheet, Text, View } from 'react-native';
+import { Linking, StyleSheet, Text, useWindowDimensions, View } from 'react-native';
 import { CommonResolutions, useCameraDevices, useVideoOutput } from 'react-native-vision-camera';
-import { SafeAreaView } from 'react-native-safe-area-context';
+import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { Button } from '@/components/Button';
 import { IconButton } from '@/components/IconButton';
-import { radius, spacing, textStyles, useTheme } from '@/theme';
+import { prompterBox } from '@/features/prompter/layout';
+import { Prompter } from '@/features/prompter/Prompter';
+import { PrompterControls } from '@/features/prompter/PrompterControls';
+import { SAMPLE_SCRIPT } from '@/features/prompter/sampleScript';
+import { useCountdown } from '@/features/prompter/useCountdown';
+import { usePrompterSettings } from '@/features/prompter/usePrompterSettings';
+import { fontSize, radius, spacing, textStyles, touchTarget, useTheme } from '@/theme';
 
 import { CameraPreview } from './CameraPreview';
 import { saveResultMessage, type SaveResult } from './gallery';
@@ -22,9 +28,11 @@ type Props = {
   onBusyChange?: (busy: boolean) => void;
 };
 
-/** Live preview with lens switch, record button and elapsed time. */
+/** Live preview with the prompter, its controls, the record button and elapsed time. */
 export function Recorder({ onBusyChange }: Props) {
   const { colors } = useTheme();
+  const insets = useSafeAreaInsets();
+  const window = useWindowDimensions();
   const [position, setPosition] = useState<LensPosition>(DEFAULT_POSITION);
   const canSwitch = canSwitchPosition(useCameraDevices().map((device) => device.position));
 
@@ -44,19 +52,84 @@ export function Recorder({ onBusyChange }: Props) {
   const { state, elapsedSeconds, start, stop } = useVideoRecording(videoOutput, {
     onFinished: saveRecording,
   });
-  const busy = isRecordingBusy(state);
   const isRecording = state.status === 'recording';
+
+  const settings = usePrompterSettings();
+  const countdown = useCountdown();
+  const [paused, setPaused] = useState(false);
+  const [restartKey, setRestartKey] = useState(0);
+  // The text only moves while the camera is actually recording, so recording
+  // and scrolling start together once the countdown hands over.
+  const playing = isRecording && !paused;
+  const busy = isRecordingBusy(state) || countdown.isRunning;
 
   useEffect(() => {
     onBusyChange?.(busy);
   }, [busy, onBusyChange]);
 
+  const onRecordPress = () => {
+    if (countdown.isRunning) {
+      countdown.cancel();
+    } else if (isRecording) {
+      stop();
+    } else {
+      setSaveStatus(undefined);
+      setPaused(false);
+      setRestartKey((key) => key + 1);
+      countdown.start(start);
+    }
+  };
+
+  // Directly under the top row of buttons, as close to the front lens as possible.
+  const box = prompterBox({
+    screenWidth: window.width,
+    screenHeight: window.height,
+    topOffset: insets.top + spacing.md + touchTarget + spacing.sm,
+  });
+
   return (
     <View style={StyleSheet.absoluteFill}>
       <CameraPreview position={position} outputs={outputs} />
 
+      <Prompter
+        text={SAMPLE_SCRIPT}
+        box={box}
+        speed={settings.speed}
+        fontSize={settings.fontSize}
+        playing={playing}
+        restartKey={restartKey}
+        onPress={() => setPaused((value) => !value)}
+      />
+      {isRecording && paused ? (
+        <Text
+          style={[
+            textStyles.caption,
+            styles.notice,
+            styles.pausedLabel,
+            {
+              top: box.top + box.height + spacing.sm,
+              color: colors.onScrim,
+              backgroundColor: colors.scrim,
+            },
+          ]}
+        >
+          Paused · tap the text to continue
+        </Text>
+      ) : null}
+
+      {countdown.value !== undefined ? (
+        <View style={styles.countdown} pointerEvents="none">
+          <Text
+            accessibilityLiveRegion="assertive"
+            style={[styles.countdownText, { color: colors.onScrim }]}
+          >
+            {countdown.value}
+          </Text>
+        </View>
+      ) : null}
+
       <SafeAreaView edges={['top']} style={styles.top} pointerEvents="box-none">
-        {busy ? (
+        {isRecordingBusy(state) ? (
           <View
             accessibilityRole="timer"
             accessibilityLabel={`Recording, ${formatDuration(elapsedSeconds)}`}
@@ -113,10 +186,17 @@ export function Recorder({ onBusyChange }: Props) {
             onPress={() => Linking.openSettings()}
           />
         ) : null}
+        <PrompterControls
+          speed={settings.speed}
+          fontSize={settings.fontSize}
+          onSpeedChange={settings.setSpeed}
+          onFontSizeChange={settings.setFontSize}
+        />
         <RecordButton
-          isRecording={isRecording}
+          isRecording={isRecording || countdown.isRunning}
+          label={countdown.isRunning ? 'Cancel countdown' : undefined}
           disabled={state.status === 'starting' || state.status === 'stopping'}
-          onPress={isRecording ? stop : start}
+          onPress={onRecordPress}
         />
       </SafeAreaView>
     </View>
@@ -160,5 +240,22 @@ const styles = StyleSheet.create({
     borderRadius: radius.sm,
     overflow: 'hidden',
     textAlign: 'center',
+  },
+  pausedLabel: {
+    position: 'absolute',
+    alignSelf: 'center',
+  },
+  countdown: {
+    position: 'absolute',
+    top: 0,
+    right: 0,
+    bottom: 0,
+    left: 0,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  countdownText: {
+    fontSize: fontSize.display,
+    fontWeight: '800',
   },
 });
