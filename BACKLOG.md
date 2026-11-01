@@ -37,14 +37,11 @@ Claude bu dosyayı **yukarıdan aşağıya** işler. Sıra önemlidir; bir işin
   - Kabul: `src/theme` (karanlık varsayılan + açık), Button/Card/IconButton/Slider/Screen; ekranlarda sabit renk/boyut yok.
   - Furkan'dan: 2 palet önerisinden birini seçmesi.
   - Seçim: Palet A · Sinema (amber vurgu). Arayüz metinleri şimdilik İngilizce (TR çeviri PRM-20).
-- [~] **PRM-6** Çökme raporlama (Sentry) — CİHAZ, FURKAN
+- [x] **PRM-6** Çökme raporlama (Sentry) — CİHAZ, FURKAN
   - Kabul: Sentry yapılandırılmış, DSN ortam değişkeninden; dev modda "Test çökmesi" butonu; olay panelde görünüyor.
   - Furkan'dan: Sentry hesabı ve DSN.
   - Durum: org `ozkulfurkan`, proje `cuecam`; DSN ve token `.env` ve EAS ortam değişkenlerinde. Emülatörde test olayı gönderildi (event `b6e3355654a047debb86b88ea2fa03b4`).
-  - Cihazda nasıl test edilir:
-    1. https://ozkulfurkan.sentry.io/issues/ adresinde "Sentry test crash (dev only)" hatası görünmeli (environment: development).
-    2. Telefonda dev build ile Ayarlar → kırmızı "Test crash" düğmesine bas; 1-2 dk içinde panelde yeni olay olmalı.
-    3. Sonraki EAS preview derlemesinde hata izleri kaynak dosya/satır adlarıyla görünmeli (source map yüklendi).
+  - ✅ Test olayı Sentry panelinde görüldü (Furkan doğruladı).
 
 ## Sprint 2 · Kamera ve kayıt (önkoşul: PRM-2)
 
