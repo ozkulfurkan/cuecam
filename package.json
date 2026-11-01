@@ -37,6 +37,7 @@
     "expo-file-system": "~58.0.13",
     "expo-font": "~58.0.11",
     "expo-image": "~58.0.18",
+    "expo-key-event": "^1.9.0",
     "expo-linking": "~58.0.15",
     "expo-localization": "~58.0.5",
     "expo-media-library": "~58.0.13",

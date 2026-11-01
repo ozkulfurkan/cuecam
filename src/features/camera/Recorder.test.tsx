@@ -57,6 +57,15 @@ jest.mock('../../../modules/thermal-state', () => {
     },
   };
 });
+// Hardware keys: tests press bound actions through mockKeys.press().
+const mockKeys: { handler?: (action: string) => void } = {};
+jest.mock('@/features/prompter/useHardwareKeys', () => ({
+  useHardwareKeys: (handler: (action: string) => void) => {
+    mockKeys.handler = handler;
+  },
+}));
+const pressKey = (action: string) => act(async () => mockKeys.handler!(action));
+
 const { mockThermal } = jest.requireMock('../../../modules/thermal-state') as {
   mockThermal: { set: (state: string) => void };
 };
@@ -540,5 +549,98 @@ describe('storage and heat', () => {
 
     await pressButton('Start recording');
     expect(alert.mock.calls[0][1]).toMatch(/very hot/);
+  });
+});
+
+describe('keyboard and remote', () => {
+  async function layoutScript() {
+    const scroller = screen.getByTestId('prompter-text').parent!;
+    await fireEvent(scroller, 'layout', { nativeEvent: { layout: { height: 5000 } } });
+  }
+
+  async function renderFrames() {
+    await act(() => reanimated.mockRunFrames(2, 16));
+    const recorder = latestRecorder();
+    if (recorder) recorder.recordedDuration += 1;
+    await act(() => jest.advanceTimersByTime(300));
+  }
+
+  it('starts and stops recording with the record key', async () => {
+    await renderRecorder();
+
+    await pressKey('toggleRecording');
+    expect(screen.getByText('3')).toBeTruthy();
+    await act(() => jest.advanceTimersByTime(3200));
+    expect(visionCamera.mockRecorders).toHaveLength(1);
+
+    const stopSpy = jest.spyOn(
+      latestRecorder() as unknown as { stopRecording: () => Promise<void> },
+      'stopRecording',
+    );
+    await pressKey('toggleRecording');
+    expect(stopSpy).toHaveBeenCalledTimes(1);
+  });
+
+  it('cancels the countdown with the record key', async () => {
+    await renderRecorder();
+    await pressKey('toggleRecording');
+    await pressKey('toggleRecording');
+    await act(() => jest.advanceTimersByTime(4000));
+
+    expect(visionCamera.mockRecorders).toHaveLength(0);
+  });
+
+  it('pauses and resumes the text while recording', async () => {
+    await renderRecorder();
+    await pressKey('togglePause');
+    // Not recording yet: nothing to pause.
+    expect(screen.queryByText('Paused · tap the text to continue')).toBeNull();
+
+    await startRecording();
+    await pressKey('togglePause');
+    expect(screen.getByText('Paused · tap the text to continue')).toBeTruthy();
+    await pressKey('togglePause');
+    expect(screen.queryByText('Paused · tap the text to continue')).toBeNull();
+  });
+
+  it('changes speed within its range', async () => {
+    await renderRecorder();
+    expect(screen.getByText('Speed 4')).toBeTruthy();
+
+    await pressKey('speedUp');
+    await pressKey('speedUp');
+    expect(screen.getByText('Speed 6')).toBeTruthy();
+    await pressKey('speedDown');
+    expect(screen.getByText('Speed 5')).toBeTruthy();
+
+    for (let i = 0; i < 12; i += 1) await pressKey('speedUp');
+    expect(screen.getByText('Speed 10')).toBeTruthy();
+  });
+
+  it('jumps the text forward and back, even while paused', async () => {
+    await renderRecorder();
+    await layoutScript();
+    await startRecording();
+    // Paused: only the jumps move the text. (Recording keeps the elapsed-time
+    // poll re-rendering, which the mocked animated style needs.)
+    await pressKey('togglePause');
+    await renderFrames();
+    expect(prompterOffset()).toBe(0);
+
+    await pressKey('jumpForward');
+    await renderFrames();
+    await pressKey('jumpForward');
+    await renderFrames();
+    const twoJumps = prompterOffset();
+    expect(twoJumps).toBeGreaterThan(0);
+
+    await pressKey('jumpBack');
+    await renderFrames();
+    expect(prompterOffset()).toBeCloseTo(twoJumps / 2);
+
+    await pressKey('jumpBack');
+    await pressKey('jumpBack');
+    await renderFrames();
+    expect(prompterOffset()).toBe(0);
   });
 });

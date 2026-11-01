@@ -181,8 +181,24 @@ Claude bu dosyayı **yukarıdan aşağıya** işler. Sıra önemlidir; bir işin
     3. Az yer testi: Ayarlar → kalite 4K seç. Telefonda boş alan ~5 GB'tan azsa uyarı çıkmalı (4K'da 10 dk ≈ 9 GB gerekir). Uyarıdaki dakika makul mü? "Vazgeç" kaydı başlatmamalı, "Yine de kaydet" başlatmalı.
     4. (İsteğe bağlı) Yer bitme testi: büyük dosyalarla telefonu doldurup 4K kayıt al → kayıt kendiliğinden durmalı, "depolama neredeyse dolu — video kaydedildi" yazmalı, video galeride oynamalı.
     5. Isı: telefonu ısıtmak zor; 4K'da 10–15 dk kayıt veya güneşte/şarjdayken dene. Dev build'de turuncu/kırmızı bildirim görülürse not al. Hiç görmezsen de sorun değil — asıl kontrol, uygulamanın açılıp kayıt yapabilmesi.
-- [ ] **PRM-25** Bluetooth kumanda / klavye — CİHAZ
+- [~] **PRM-25** Bluetooth kumanda / klavye — CİHAZ
   - Kabul: boşluk duraklatır, oklar hızı değiştirir, kayıt uzaktan başlar.
+  - Durum: yeni paket `expo-key-event` (Expo Modules API ile yazılmış, iOS + Android, bakımı sürüyor) → **yeni development build gerekiyor**. Paket, native modülü olmayan eski bir build'de yüklenmez (kayıt ekranı çökmez, yalnız tuşlar çalışmaz). Tuşlar yalnızca Kayıt ekranı açıkken dinlenir.
+  - Tuş eşlemesi tek dosyada: `src/features/prompter/keyBindings.ts`
+    - Boşluk / Enter / (Android) medya oynat-duraklat → yazıyı duraklat/devam (yalnız kayıt sırasında; dokunmakla aynı)
+    - Yukarı / aşağı ok → hız +1 / −1 (basılı tutunca tekrarlar)
+    - Page Down / sağ ok / (Android) medya sonraki → yazıyı 3 satır ileri atlat; Page Up / sol ok / (Android) medya önceki → 3 satır geri (duraklatılmışken de çalışır)
+    - **R** / (Android) medya kayıt tuşu → kaydı başlat (3-2-1) / geri sayımı iptal / durdur
+    - Ses tuşları bilerek boşta: Android'de ses ayarı bozulmasın. "Selfie kumandası" (ses+ gönderen) kullanılacaksa `keyBindings.ts`'te `toggleRecording`'e `'android:24'` eklenmesi yeterli. iOS'ta ses ve medya tuşları uygulamaya hiç ulaşmaz (sistem kısıtı).
+  - ❓ Furkan'a soru: Page Up/Down'ı "metni atlat" olarak atadım (sayfa çeviren kumandalarda en işe yarar davranış). Hız değiştirmesini istersen `keyBindings.ts`'te iki satırlık değişiklik.
+  - Saf mantık + testler: `keymap.ts` (çakışma kontrolü, platform kodları, basılı tutma kuralları), `jumpOffset`; Recorder entegrasyon testleri (kayıt, geri sayım iptali, duraklatma, hız sınırı, atlama).
+  - Cihazda nasıl test edilir (yeni dev build ile; Bluetooth klavye veya kumanda eşleştir):
+    1. Kayıt ekranını aç. **R** → 3-2-1 başlamalı; geri sayım sırasında tekrar **R** → iptal. Tekrar **R** → kayıt başlar, bir daha **R** → durur ve galeriye kaydeder.
+    2. Kayıt sırasında **Boşluk** → "Duraklatıldı" yazısı, metin durur (kayıt devam eder); tekrar **Boşluk** → devam. **Enter** aynı işi yapmalı.
+    3. **Yukarı/aşağı ok** → alttaki "Hız" değeri değişmeli (1–10 arası); basılı tutunca hızlıca artmalı.
+    4. **Page Down / Page Up** (veya sağ/sol ok) → metin 3 satır ileri/geri atlamalı.
+    5. Elindeki ucuz kumandayı dene: hangi tuşu ne yapıyor? Çalışmayan tuş olursa, dev build'de Metro konsolunda `No mapping found for keyCode: …` uyarısındaki kodu bana yaz, eşlemeye ekleyeyim.
+    6. Android'de ses tuşlarının hâlâ sesi değiştirdiğini kontrol et.
 - [ ] **PRM-26** Cihaz test matrisi — CİHAZ, FURKAN
   - Kabul: Samsung A, Xiaomi, eski Android, güncel iPhone, eski iPhone'da kayıt+kaydet akışı geçiyor; bulgular yeni PRM olarak bu dosyaya eklendi.
 - [ ] **PRM-27** Uzun kayıt performansı — CİHAZ

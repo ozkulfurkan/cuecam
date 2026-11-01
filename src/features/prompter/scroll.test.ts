@@ -1,6 +1,7 @@
 import {
   advanceOffset,
   FONT_SIZE_RANGE,
+  jumpOffset,
   lineHeightFor,
   MAX_FRAME_STEP_MS,
   maxScrollOffset,
@@ -54,5 +55,17 @@ describe('maxScrollOffset', () => {
 
   it('is zero when the content fits', () => {
     expect(maxScrollOffset(200, 300)).toBe(0);
+  });
+});
+
+describe('jumpOffset', () => {
+  it('moves forward and back within the script', () => {
+    expect(jumpOffset(100, 150, 1000)).toBe(250);
+    expect(jumpOffset(100, -150, 1000)).toBe(0);
+    expect(jumpOffset(900, 150, 1000)).toBe(1000);
+  });
+
+  it('stays at the top when the script fits the box', () => {
+    expect(jumpOffset(0, 150, -20)).toBe(0);
   });
 });

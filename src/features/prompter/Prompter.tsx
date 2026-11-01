@@ -10,7 +10,13 @@ import { useI18n } from '@/i18n/I18nProvider';
 import { radius, spacing, useTheme } from '@/theme';
 
 import type { PrompterBox } from './layout';
-import { advanceOffset, lineHeightFor, maxScrollOffset, pixelsPerSecond } from './scroll';
+import {
+  advanceOffset,
+  jumpOffset,
+  lineHeightFor,
+  maxScrollOffset,
+  pixelsPerSecond,
+} from './scroll';
 
 type Props = {
   text: string;
@@ -20,6 +26,8 @@ type Props = {
   playing: boolean;
   /** Change this value to jump back to the top (e.g. for a new recording). */
   restartKey: number;
+  /** A new `id` moves the text by `lines` (negative = back), paused or not. */
+  jump?: { id: number; lines: number };
   onPress: () => void;
 };
 
@@ -28,7 +36,16 @@ type Props = {
  * advances a shared offset each frame, so the camera, the recorder and JS work
  * cannot make it stutter. Speed changes apply on the next frame.
  */
-export function Prompter({ text, box, speed, fontSize, playing, restartKey, onPress }: Props) {
+export function Prompter({
+  text,
+  box,
+  speed,
+  fontSize,
+  playing,
+  restartKey,
+  jump,
+  onPress,
+}: Props) {
   const { colors } = useTheme();
   const { t } = useI18n();
   const offset = useSharedValue(0);
@@ -36,6 +53,8 @@ export function Prompter({ text, box, speed, fontSize, playing, restartKey, onPr
   const isPlaying = useSharedValue(playing);
   const contentHeight = useSharedValue(0);
   const viewportHeight = useSharedValue(box.height);
+  // Applied by the frame callback on the UI thread, which owns the offset.
+  const pendingJump = useSharedValue(0);
 
   useEffect(() => {
     pxPerSecond.set(pixelsPerSecond(speed, fontSize));
@@ -53,7 +72,22 @@ export function Prompter({ text, box, speed, fontSize, playing, restartKey, onPr
     offset.set(0);
   }, [offset, restartKey]);
 
+  const jumpId = jump?.id;
+  const jumpPx = (jump?.lines ?? 0) * lineHeightFor(fontSize);
+  useEffect(() => {
+    if (jumpId !== undefined) pendingJump.set(jumpPx);
+    // Only a new jump id triggers a jump, not a font size change.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [jumpId, pendingJump]);
+
   useFrameCallback((frame) => {
+    const delta = pendingJump.get();
+    if (delta !== 0) {
+      pendingJump.set(0);
+      offset.set(
+        jumpOffset(offset.get(), delta, maxScrollOffset(contentHeight.get(), viewportHeight.get())),
+      );
+    }
     if (!isPlaying.get()) return;
     offset.set(
       advanceOffset(

@@ -49,3 +49,9 @@ export function maxScrollOffset(contentHeight: number, viewportHeight: number): 
   'worklet';
   return Math.max(contentHeight - viewportHeight, 0);
 }
+
+/** Offset after jumping by `deltaPx` (negative = back), kept inside the script. */
+export function jumpOffset(offset: number, deltaPx: number, maxOffset: number): number {
+  'worklet';
+  return Math.min(Math.max(offset + deltaPx, 0), Math.max(maxOffset, 0));
+}

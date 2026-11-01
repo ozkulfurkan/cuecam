@@ -16,7 +16,9 @@ import { IconButton } from '@/components/IconButton';
 import { controlsArea, prompterBox } from '@/features/prompter/layout';
 import { Prompter } from '@/features/prompter/Prompter';
 import { PrompterControls } from '@/features/prompter/PrompterControls';
+import { JUMP_LINES, type KeyAction } from '@/features/prompter/keyBindings';
 import { useCountdown } from '@/features/prompter/useCountdown';
+import { useHardwareKeys } from '@/features/prompter/useHardwareKeys';
 import { usePrompterSettings } from '@/features/prompter/usePrompterSettings';
 import { useI18n } from '@/i18n/I18nProvider';
 import { whenAppActive } from '@/lib/whenAppActive';
@@ -103,6 +105,7 @@ export function Recorder({ text, onBusyChange }: Props) {
   const countdown = useCountdown();
   const [paused, setPaused] = useState(false);
   const [restartKey, setRestartKey] = useState(0);
+  const [jump, setJump] = useState<{ id: number; lines: number }>();
   // The text only moves while the camera is actually recording, so recording
   // and scrolling start together once the countdown hands over.
   const playing = isRecording && !paused;
@@ -179,6 +182,32 @@ export function Recorder({ text, onBusyChange }: Props) {
     }
   };
 
+  // Bluetooth keyboards and remotes (bindings in keyBindings.ts).
+  useHardwareKeys((action: KeyAction) => {
+    switch (action) {
+      case 'togglePause':
+        // Like tapping the text: only meaningful while the text is moving.
+        if (isRecording) setPaused((value) => !value);
+        break;
+      case 'speedUp':
+      case 'speedDown':
+        settings.stepSpeed(action === 'speedUp' ? 1 : -1);
+        break;
+      case 'jumpForward':
+      case 'jumpBack':
+        setJump((last) => ({
+          id: (last?.id ?? 0) + 1,
+          lines: action === 'jumpForward' ? JUMP_LINES : -JUMP_LINES,
+        }));
+        break;
+      case 'toggleRecording':
+        // Same as the record button: countdown, cancel, or stop.
+        if (state.status === 'starting' || state.status === 'stopping') break;
+        onRecordPress();
+        break;
+    }
+  });
+
   // Next to the front lens: under the top row of buttons in portrait, against
   // the camera edge in landscape (see layout.ts).
   const cameraSide = cameraSideFor(orientation);
@@ -214,6 +243,7 @@ export function Recorder({ text, onBusyChange }: Props) {
         fontSize={settings.fontSize}
         playing={playing}
         restartKey={restartKey}
+        jump={jump}
         onPress={() => setPaused((value) => !value)}
       />
       {isRecording && paused ? (
