@@ -1,6 +1,8 @@
 // Used automatically by Jest for 'react-native-vision-camera' (its Nitro native
-// modules do not exist under Jest). Tests set statuses with setMockPermissions.
-import { useState } from 'react';
+// modules do not exist under Jest). Tests set statuses with setMockPermissions
+// and available lenses with setMockDevices.
+import { createElement, useState } from 'react';
+import { View } from 'react-native';
 
 type PermissionStatus = 'not-determined' | 'authorized' | 'denied' | 'restricted';
 
@@ -45,3 +47,21 @@ function makeHook(kind: keyof typeof mockStatuses) {
 
 export const useCameraPermission = makeHook('camera');
 export const useMicrophonePermission = makeHook('microphone');
+
+type Position = 'front' | 'back' | 'external';
+
+let mockDevices: { id: string; position: Position }[] = [];
+
+export function setMockDevices(positions: Position[]) {
+  mockDevices = positions.map((position) => ({ id: `mock-${position}`, position }));
+}
+setMockDevices(['front', 'back']);
+
+export const useCameraDevices = () => mockDevices;
+export const useCameraDevice = (position: Position) =>
+  mockDevices.find((device) => device.position === position);
+
+/** Renders a plain View; tests read the props it was given via testID "camera". */
+export function Camera(props: Record<string, unknown>) {
+  return createElement(View, { testID: 'camera', ...props });
+}

@@ -1,33 +1,46 @@
 import { useRouter } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
-import { StyleSheet, Text } from 'react-native';
+import { StyleSheet, View } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 
-import { Button } from '@/components/Button';
-import { Screen } from '@/components/Screen';
+import { IconButton } from '@/components/IconButton';
 import { CameraPermissionGate } from '@/features/camera/CameraPermissionGate';
-import { spacing, textStyles, useTheme } from '@/theme';
+import { Recorder } from '@/features/camera/Recorder';
+import { spacing, useTheme } from '@/theme';
 
-// Full-screen recorder. Camera preview arrives in PRM-8, recording in PRM-9.
+// Full-screen recorder: the live camera fills the screen once permissions are
+// granted; until then the permission prompt is shown. Close is always available.
 export default function RecordScreen() {
   const router = useRouter();
   const { colors } = useTheme();
 
   return (
-    <Screen centered edges={['top', 'bottom']}>
+    <View style={[styles.root, { backgroundColor: colors.background }]}>
       <StatusBar hidden />
       <CameraPermissionGate>
-        <Text style={[textStyles.title, { color: colors.text }]}>Camera ready</Text>
+        <Recorder />
       </CameraPermissionGate>
-      <Button
-        label="Close"
-        variant="secondary"
-        onPress={() => router.back()}
-        style={styles.close}
-      />
-    </Screen>
+      <SafeAreaView edges={['top']} style={styles.close} pointerEvents="box-none">
+        <IconButton
+          icon={{ ios: 'xmark', android: 'close' }}
+          accessibilityLabel="Close"
+          onPress={() => router.back()}
+        />
+      </SafeAreaView>
+    </View>
   );
 }
 
 const styles = StyleSheet.create({
-  close: { marginTop: spacing.lg, alignSelf: 'stretch' },
+  root: {
+    flex: 1,
+    justifyContent: 'center',
+    padding: spacing.lg,
+  },
+  close: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    padding: spacing.md,
+  },
 });

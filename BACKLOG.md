@@ -55,8 +55,15 @@ Claude bu dosyayı **yukarıdan aşağıya** işler. Sıra önemlidir; bir işin
     4. Telefon Ayarlar → Uygulamalar → Cue Cam → İzinler'den mikrofonu kapat, uygulamaya dön → Kayıt → "Microphone access is off" + "Open Settings".
     5. "Open Settings" Cue Cam'in ayar sayfasını açmalı; mikrofonu aç, geri dön → ekran kendiliğinden "Camera ready" olmalı.
   - iOS: izin metinleri TR/EN `app.config.ts`'te; Apple hesabı gelince iPhone'da aynı adımlar (Türkçe telefonda Türkçe metin görünmeli).
-- [ ] **PRM-8** Kamera önizleme — CİHAZ
+- [~] **PRM-8** Kamera önizleme — CİHAZ
   - Kabul: tam ekran önizleme, ön/arka geçişi, 30 fps.
+  - Durum: tam ekran önizleme, ön kamerayla başlar (aynalı), sağ üstte değiştirme düğmesi; oturum 30 fps kısıtıyla açılır. Kamera yalnızca ekran açık ve uygulama ön plandayken çalışır. Android emülatörde: ön ve arka 30 fps, arka plana alınca kamera kapanıyor, dönünce devam ediyor.
+  - Cihazda nasıl test edilir (dev build veya yeni APK):
+    1. Kayıt sekmesi → tam ekran ön kamera görüntüsü; görüntü ayna gibi olmalı (sağ elini kaldırınca ekranda sağda).
+    2. Dev build'de alt ortada "30 fps · front" yazısı görünmeli.
+    3. Sağ üstteki düğmeyle arka kameraya geç → "30 fps · back"; tekrar bas → ön kamera.
+    4. Ana ekrana çık, 5 sn bekle, geri dön → görüntü donmadan devam etmeli; telefonda kamera göstergesi arka planda sönmüş olmalı.
+    5. Sol üstteki X ile kapat → ana ekran.
 - [ ] **PRM-9** Video ve ses kaydı — CİHAZ
   - Kabul: başlat/durdur, süre sayacı, 1080p, ses senkron.
 - [ ] **PRM-10** Galeriye kaydetme — CİHAZ
@@ -124,3 +131,5 @@ Claude bu dosyayı **yukarıdan aşağıya** işler. Sıra önemlidir; bir işin
 ## Notlar / bulgular
 
 (Cihaz testinde çıkan hatalar buraya `BUG-<no>` olarak eklenir ve ilgili sprintin sonuna sıralanır.)
+
+- Gözlem (PRM-8, Android emülatör): Kayıt ekranında uygulama arka plandan dönünce gizli durum çubuğu yeniden görünüyor. PRM-16 (ekran yönü / tam ekran kaydı) kapsamında ele alınacak.
