@@ -79,6 +79,8 @@ export class MockRecorder {
   isRecording = false;
   recordedDuration = 0;
   filePath = `/tmp/mock-${Date.now()}.mp4`;
+  /** The RecorderSettings passed to createRecorder. */
+  settings: Record<string, unknown> = {};
   private onFinished?: (path: string, reason: string) => void;
   private onError?: (error: Error) => void;
 
@@ -112,8 +114,9 @@ export const mockRecorders: MockRecorder[] = [];
 export function useVideoOutput(options: Record<string, unknown> = {}) {
   const [output] = useState(() => ({
     options,
-    createRecorder: async () => {
+    createRecorder: async (settings: Record<string, unknown> = {}) => {
       const recorder = new MockRecorder();
+      recorder.settings = settings;
       mockRecorders.push(recorder);
       return recorder;
     },

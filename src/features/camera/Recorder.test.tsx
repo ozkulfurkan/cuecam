@@ -1,7 +1,7 @@
 import { act, fireEvent, render, screen } from '@testing-library/react-native';
 import * as mediaLibraryModule from 'expo-media-library';
 import * as fileSystemModule from 'expo-file-system';
-import { AppState, StyleSheet, type AppStateStatus } from 'react-native';
+import { Alert, AppState, StyleSheet, type AppStateStatus } from 'react-native';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import * as reanimatedModule from 'react-native-reanimated';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
@@ -13,6 +13,7 @@ import { storage } from '@/storage/storage';
 import { Recorder } from './Recorder';
 
 type MockRecorder = {
+  settings: Record<string, unknown>;
   recordedDuration: number;
   filePath: string;
   finishNow: (reason?: string) => void;
@@ -33,7 +34,32 @@ const mediaLibrary = mediaLibraryModule as unknown as {
 };
 
 // Helper from __mocks__/expo-file-system.ts.
-const fileSystem = fileSystemModule as unknown as { mockFiles: { existing: Set<string> } };
+const fileSystem = fileSystemModule as unknown as {
+  mockFiles: { existing: Set<string> };
+  mockDisk: { availableBytes: number };
+};
+
+// The native ThermalState module, driven by tests through mockThermal.set().
+jest.mock('../../../modules/thermal-state', () => {
+  let mockState = 'nominal';
+  const mockListeners = new Set<(mockNext: string) => void>();
+  return {
+    getThermalState: () => mockState,
+    addThermalStateListener: (mockListener: (mockNext: string) => void) => {
+      mockListeners.add(mockListener);
+      return { remove: () => mockListeners.delete(mockListener) };
+    },
+    mockThermal: {
+      set: (mockNext: string) => {
+        mockState = mockNext;
+        mockListeners.forEach((mockListener) => mockListener(mockNext));
+      },
+    },
+  };
+});
+const { mockThermal } = jest.requireMock('../../../modules/thermal-state') as {
+  mockThermal: { set: (state: string) => void };
+};
 
 // Helper from __mocks__/react-native-reanimated.ts.
 const reanimated = reanimatedModule as unknown as {
@@ -429,5 +455,90 @@ describe('interruptions', () => {
     await renderRecorder();
 
     expect(storage.getString('recorder.pendingRecording.v1')).toBeUndefined();
+  });
+});
+
+describe('storage and heat', () => {
+  const MB = 1024 * 1024;
+  const plentyOfSpace = fileSystem.mockDisk.availableBytes;
+
+  afterEach(() => {
+    fileSystem.mockDisk.availableBytes = plentyOfSpace;
+    mockThermal.set('nominal');
+    jest.restoreAllMocks();
+  });
+
+  type AlertButton = { text: string; onPress?: () => void };
+  const alertButtons = (spy: jest.SpyInstance) => spy.mock.calls[0][2] as AlertButton[];
+
+  it('limits each take to the free space without asking when there is plenty', async () => {
+    const alert = jest.spyOn(Alert, 'alert');
+    await renderRecorder();
+    await startRecording();
+
+    expect(alert).not.toHaveBeenCalled();
+    expect(latestRecorder().settings.maxFileSize).toBeGreaterThan(1000 * MB);
+  });
+
+  it('warns about low storage and records only when asked to', async () => {
+    // About 5 minutes of 1080p after the reserve and the gallery copy.
+    fileSystem.mockDisk.availableBytes = 300 * MB + 2 * 5 * 150 * MB;
+    const alert = jest.spyOn(Alert, 'alert');
+    await renderRecorder();
+
+    await pressButton('Start recording');
+    expect(alert).toHaveBeenCalledWith(
+      'Before you record',
+      'Storage is running low: about 5 min of 1080p video fits.',
+      expect.any(Array),
+    );
+    expect(screen.queryByText('3')).toBeNull();
+
+    // Cancel: nothing happens.
+    alertButtons(alert)[0].onPress?.();
+    await act(() => jest.advanceTimersByTime(4000));
+    expect(visionCamera.mockRecorders).toHaveLength(0);
+
+    await pressButton('Start recording');
+    await act(async () => alertButtons(alert).find((b) => b.text === 'Record anyway')!.onPress!());
+    await act(() => jest.advanceTimersByTime(3200));
+
+    expect(visionCamera.mockRecorders).toHaveLength(1);
+    expect(latestRecorder().settings.maxFileSize).toBe(5 * 150 * MB);
+  });
+
+  it('says why a take stopped when storage ran out', async () => {
+    await renderRecorder();
+    await startRecording();
+    await act(() => latestRecorder().finishNow('max-file-size-reached'));
+
+    expect(
+      await screen.findByText(
+        'Recording stopped: storage is almost full — video saved to the "Prompter" album',
+      ),
+    ).toBeTruthy();
+  });
+
+  it('shows heat notices as the phone warms up', async () => {
+    await renderRecorder();
+    expect(screen.queryByText(/Phone is/)).toBeNull();
+
+    await act(async () => mockThermal.set('serious'));
+    expect(screen.getByText('Phone is getting warm — long takes may drop frames')).toBeTruthy();
+
+    await act(async () => mockThermal.set('critical'));
+    expect(screen.getByText('Phone is very hot — the camera may stop soon')).toBeTruthy();
+
+    await act(async () => mockThermal.set('fair'));
+    expect(screen.queryByText(/Phone is/)).toBeNull();
+  });
+
+  it('asks before recording on a very hot phone', async () => {
+    mockThermal.set('critical');
+    const alert = jest.spyOn(Alert, 'alert');
+    await renderRecorder();
+
+    await pressButton('Start recording');
+    expect(alert.mock.calls[0][1]).toMatch(/very hot/);
   });
 });

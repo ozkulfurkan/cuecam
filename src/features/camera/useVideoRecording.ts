@@ -68,7 +68,8 @@ export function useVideoRecording(videoOutput: CameraVideoOutput, { onFinished }
     onFinishedRef.current?.(recording);
   };
 
-  const start = async () => {
+  /** `maxFileSize`: stop cleanly before the disk fills up (see storageSpace.ts). */
+  const start = async ({ maxFileSize }: { maxFileSize?: number } = {}) => {
     if (!canStartRecording(stateRef.current)) return;
     dispatch({ type: 'start' });
     stateRef.current = { ...stateRef.current, status: 'starting' };
@@ -77,14 +78,25 @@ export function useVideoRecording(videoOutput: CameraVideoOutput, { onFinished }
     let started = false;
     try {
       // One Recorder per file; it writes to a temporary file in the app cache.
-      const recorder = await videoOutput.createRecorder({});
+      const recorder = await videoOutput.createRecorder(
+        maxFileSize === undefined ? {} : { maxFileSize },
+      );
       recorderRef.current = recorder;
       await recorder.startRecording(
-        (path) => {
+        (path, reason) => {
           recorderRef.current = undefined;
-          const recording = { path, durationSeconds: lastElapsedRef.current };
+          const recording: FinishedRecording = {
+            path,
+            durationSeconds: lastElapsedRef.current,
+            // The size limit is only set from free space, so hitting it means
+            // the disk was about to fill up.
+            ...(reason === 'max-file-size-reached' ? { interruptedBy: 'storage-full' } : {}),
+          };
           dispatch({ type: 'finished', recording });
-          finish({ ...recording, interruptedBy: stateRef.current.interruptedBy });
+          finish({
+            ...recording,
+            interruptedBy: stateRef.current.interruptedBy ?? recording.interruptedBy,
+          });
         },
         (error) => {
           // Mid-take error: on iOS this is also how an interruption (phone

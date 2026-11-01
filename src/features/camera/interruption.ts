@@ -11,10 +11,17 @@ import type { AppStateStatus } from 'react-native';
  * - `camera-unavailable`: the OS took the camera away (another app, split
  *   screen, backgrounding reported by the camera itself).
  * - `system-pressure`: the camera was stopped because the phone is too hot.
+ * - `storage-full`: the recorder hit its size limit (set from free space,
+ *   see storageSpace.ts) and stopped before the disk filled up.
  * - `recording-error`: the recorder itself reported an error mid-take.
  */
 export type InterruptionCause =
-  'app-background' | 'audio-in-use' | 'camera-unavailable' | 'system-pressure' | 'recording-error';
+  | 'app-background'
+  | 'audio-in-use'
+  | 'camera-unavailable'
+  | 'system-pressure'
+  | 'storage-full'
+  | 'recording-error';
 
 /**
  * Only a real backgrounding interrupts a take. iOS also reports `inactive` for

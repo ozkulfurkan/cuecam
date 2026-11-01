@@ -60,22 +60,33 @@ describe('saveResultMessage', () => {
 
 describe('saveNotice', () => {
   it('uses the plain messages for a normal take', () => {
-    expect(saveNotice({ kind: 'saving' }, false, en)).toBe('Saving to gallery…');
-    expect(saveNotice({ kind: 'saved' }, false, en)).toBe('Saved to the "Prompter" album');
+    expect(saveNotice({ kind: 'saving' }, undefined, en)).toBe('Saving to gallery…');
+    expect(saveNotice({ kind: 'saved' }, undefined, en)).toBe('Saved to the "Prompter" album');
   });
 
   it('says an interrupted take was cut short but kept', () => {
-    expect(saveNotice({ kind: 'saving' }, true, en)).toBe(
+    expect(saveNotice({ kind: 'saving' }, 'app-background', en)).toBe(
       'Recording was interrupted — saving the video…',
     );
-    expect(saveNotice({ kind: 'saved' }, true, en)).toBe(
+    expect(saveNotice({ kind: 'saved' }, 'audio-in-use', en)).toBe(
       'Recording was interrupted — video saved to the "Prompter" album',
     );
   });
 
   it('explains why an interrupted take could not be saved', () => {
-    expect(saveNotice({ kind: 'failed', message: 'disk full' }, true, en)).toBe(
+    expect(saveNotice({ kind: 'failed', message: 'disk full' }, 'camera-unavailable', en)).toBe(
       'Recording was interrupted. Not saved: disk full',
+    );
+  });
+});
+
+describe('saveNotice for takes stopped by the device', () => {
+  it('names full storage and heat as the reason', () => {
+    expect(saveNotice({ kind: 'saved' }, 'storage-full', en)).toBe(
+      'Recording stopped: storage is almost full — video saved to the "Prompter" album',
+    );
+    expect(saveNotice({ kind: 'saving' }, 'system-pressure', en)).toBe(
+      'Recording stopped: the phone is too hot — saving the video…',
     );
   });
 });

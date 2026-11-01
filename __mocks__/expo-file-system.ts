@@ -22,3 +22,12 @@ export class File {
     mockFiles.deleted.push(this.uri);
   }
 }
+
+/** Free space reported by Paths; tests set mockDisk.availableBytes. */
+export const mockDisk = { availableBytes: 64 * 1024 * 1024 * 1024 };
+
+export const Paths = {
+  get availableDiskSpace() {
+    return mockDisk.availableBytes;
+  },
+};

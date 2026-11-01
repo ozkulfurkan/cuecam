@@ -1,5 +1,7 @@
 import type { Translate } from '@/i18n/translate';
 
+import type { InterruptionCause } from './interruption';
+
 /** Product rule: every recording lands in this gallery album. */
 export const ALBUM_NAME = 'Prompter';
 
@@ -46,16 +48,38 @@ export function saveResultMessage(result: SaveResult, t: Translate): string {
 /** What the recorder shows about the last take: being saved, or how saving went. */
 export type SaveStatus = { kind: 'saving' } | SaveResult;
 
+/** Why a take ended early, as shown to the user (see InterruptionCause). */
+function endedEarlyLabel(cause: InterruptionCause, t: Translate): string {
+  switch (cause) {
+    case 'storage-full':
+      return t('recorder.stoppedStorageFull');
+    case 'system-pressure':
+      return t('recorder.stoppedHot');
+    default:
+      return t('recorder.interrupted');
+  }
+}
+
 /**
  * The notice under the record button. A take cut short by an interruption
- * (backgrounding, a call …) says so, so the user knows why it ended early and
- * that the part filmed so far was kept.
+ * (backgrounding, a call, full storage …) says so, so the user knows why it
+ * ended early and that the part filmed so far was kept.
  */
-export function saveNotice(status: SaveStatus, interrupted: boolean, t: Translate): string {
-  if (status.kind === 'saving') {
-    return t(interrupted ? 'recorder.interruptedSaving' : 'recorder.saving');
+export function saveNotice(
+  status: SaveStatus,
+  interruptedBy: InterruptionCause | undefined,
+  t: Translate,
+): string {
+  if (interruptedBy === undefined) {
+    return status.kind === 'saving' ? t('recorder.saving') : saveResultMessage(status, t);
   }
-  if (!interrupted) return saveResultMessage(status, t);
-  if (status.kind === 'saved') return t('recorder.interruptedSaved', { album: ALBUM_NAME });
-  return t('recorder.interruptedNotSaved', { reason: saveResultMessage(status, t) });
+  const why = endedEarlyLabel(interruptedBy, t);
+  switch (status.kind) {
+    case 'saving':
+      return t('recorder.keptSaving', { why });
+    case 'saved':
+      return t('recorder.keptSaved', { why, album: ALBUM_NAME });
+    default:
+      return t('recorder.keptNotSaved', { why, reason: saveResultMessage(status, t) });
+  }
 }

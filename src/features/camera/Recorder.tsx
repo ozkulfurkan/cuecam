@@ -1,5 +1,13 @@
 import { useEffect, useMemo, useState } from 'react';
-import { AppState, Linking, StyleSheet, Text, useWindowDimensions, View } from 'react-native';
+import {
+  Alert,
+  AppState,
+  Linking,
+  StyleSheet,
+  Text,
+  useWindowDimensions,
+  View,
+} from 'react-native';
 import { useCameraDevices, useVideoOutput } from 'react-native-vision-camera';
 import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 
@@ -23,7 +31,16 @@ import { fontSize, radius, spacing, textStyles, touchTarget, useTheme } from '@/
 import { CameraPreview } from './CameraPreview';
 import { saveNotice, type SaveStatus } from './gallery';
 import { fileExists } from './fileExists';
-import { causeFromAppState, causeFromCameraInterruption } from './interruption';
+import { readAvailableBytes } from './diskSpace';
+import {
+  causeFromAppState,
+  causeFromCameraInterruption,
+  type InterruptionCause,
+} from './interruption';
+import { preRecordMessage, preRecordWarnings } from './preRecordCheck';
+import { maxFileSizeFor } from './storageSpace';
+import { thermalWarning } from './thermal';
+import { useThermalState } from './useThermalState';
 import { cameraSideFor } from './orientation';
 import { canSwitchPosition, DEFAULT_POSITION, otherPosition, type LensPosition } from './preview';
 import { RecordButton } from './RecordButton';
@@ -60,19 +77,22 @@ export function Recorder({ text, onBusyChange }: Props) {
   // A stable array: a new one each render would reconfigure the camera session
   // on every timer tick while recording.
   const outputs = useMemo(() => [videoOutput], [videoOutput]);
-  const [saveStatus, setSaveStatus] = useState<{ status: SaveStatus; interrupted: boolean }>();
+  const [saveStatus, setSaveStatus] = useState<{
+    status: SaveStatus;
+    interruptedBy?: InterruptionCause;
+  }>();
   const saveRecording = async (recording: FinishedRecording) => {
-    const interrupted = recording.interruptedBy !== undefined;
+    const { interruptedBy } = recording;
     // Remembered until the save attempt is over: if the app is killed while
     // in the background, the next visit to the recorder saves it.
     savePendingRecording(recording);
-    setSaveStatus({ status: { kind: 'saving' }, interrupted });
+    setSaveStatus({ status: { kind: 'saving' }, interruptedBy });
     // A take interrupted by backgrounding is saved once the user is back:
     // the photo library may refuse writes from a suspended app.
     await whenAppActive();
     const result = await saveToGallery(recording.path);
     clearPendingRecording();
-    setSaveStatus({ status: result, interrupted });
+    setSaveStatus({ status: result, interruptedBy });
   };
   const { state, elapsedSeconds, start, stop, interrupt } = useVideoRecording(videoOutput, {
     onFinished: saveRecording,
@@ -129,16 +149,33 @@ export function Recorder({ text, onBusyChange }: Props) {
     void interrupt(causeFromCameraInterruption(reason));
   };
 
+  const thermal = useThermalState();
+  const heat = thermalWarning(thermal);
+
+  const beginTake = (availableBytes: number | undefined) => {
+    setSaveStatus(undefined);
+    setPaused(false);
+    setRestartKey((key) => key + 1);
+    countdown.start(() => start({ maxFileSize: maxFileSizeFor(availableBytes) }));
+  };
+
   const onRecordPress = () => {
     if (countdown.isRunning) {
       countdown.cancel();
     } else if (isRecording) {
       stop();
     } else {
-      setSaveStatus(undefined);
-      setPaused(false);
-      setRestartKey((key) => key + 1);
-      countdown.start(start);
+      // Checked on every take: free space changes between takes.
+      const availableBytes = readAvailableBytes();
+      const warnings = preRecordWarnings({ availableBytes, quality, thermal });
+      if (warnings.length === 0) {
+        beginTake(availableBytes);
+        return;
+      }
+      Alert.alert(t('preRecord.title'), preRecordMessage(warnings, quality, t), [
+        { text: t('common.cancel'), style: 'cancel' },
+        { text: t('preRecord.recordAnyway'), onPress: () => beginTake(availableBytes) },
+      ]);
     }
   };
 
@@ -242,6 +279,20 @@ export function Recorder({ text, onBusyChange }: Props) {
         style={[styles.bottom, { left: controls.left, right: controls.right }]}
         pointerEvents="box-none"
       >
+        {heat !== 'none' ? (
+          <Text
+            accessibilityLiveRegion="polite"
+            style={[
+              textStyles.caption,
+              styles.notice,
+              heat === 'hot'
+                ? { color: colors.onRecord, backgroundColor: colors.record }
+                : { color: colors.onAccent, backgroundColor: colors.accent },
+            ]}
+          >
+            {t(heat === 'hot' ? 'recorder.hot' : 'recorder.warm')}
+          </Text>
+        ) : null}
         {state.error ? (
           <Text
             style={[
@@ -255,14 +306,14 @@ export function Recorder({ text, onBusyChange }: Props) {
         ) : null}
         {saveStatus && !busy ? (
           <Text
-            accessibilityLiveRegion={saveStatus.interrupted ? 'assertive' : 'polite'}
+            accessibilityLiveRegion={saveStatus.interruptedBy ? 'assertive' : 'polite'}
             style={[
               textStyles.caption,
               styles.notice,
               { color: colors.text, backgroundColor: colors.surface },
             ]}
           >
-            {saveNotice(saveStatus.status, saveStatus.interrupted, t)}
+            {saveNotice(saveStatus.status, saveStatus.interruptedBy, t)}
           </Text>
         ) : null}
         {saveStatus?.status.kind === 'permission-denied' &&

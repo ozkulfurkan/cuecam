@@ -169,8 +169,18 @@ Claude bu dosyayı **yukarıdan aşağıya** işler. Sıra önemlidir; bir işin
     4. Kayıt sırasında uygulama değiştiriciye geç, uygulamayı yukarı kaydırıp öldür → uygulamayı tekrar aç → Kayıt sekmesi → bildirim çıkmalı ve video galeriye eklenmeli.
     5. Geri sayım (3-2-1) sırasında ana ekrana çık, dön → kayıt başlamamış olmalı.
     6. iPhone: kayıt sırasında Kontrol Merkezi'ni aç/kapat → kayıt devam etmeli.
-- [ ] **PRM-24** Depolama ve ısı uyarıları — CİHAZ
+- [~] **PRM-24** Depolama ve ısı uyarıları — CİHAZ
   - Kabul: kayıt öncesi boş alan kontrolü; az alanda ve ısınmada uyarı.
+  - Durum — depolama: her kayıttan önce boş alan okunur (`Paths.availableDiskSpace`, yeni paket yok). Tahmini boyut: 720p ≈ 90 MB/dk, 1080p ≈ 150 MB/dk, 4K ≈ 450 MB/dk (yüksek tarafta). 300 MB sistem payı bırakılır ve kalan alanın yarısı kullanılabilir sayılır (kayıt bitince galeri kopyası oluşana kadar dosya iki kez yer kaplar). 10 dk'dan az sığıyorsa "Depolama azalıyor: yaklaşık N dk 1080p video sığar", 2 dk'dan az sığıyorsa daha sert uyarı; "Vazgeç" / "Yine de kaydet". Ayrıca kayıt cihazına `maxFileSize` verilir: yer biterken kayıt kendiliğinden düzgünce kapanır, dosya bozulmaz ve "Kayıt durdu: depolama neredeyse dolu — video kaydedildi" yazar.
+  - Durum — ısı: hazır bakımlı bir kütüphane bulunamadı; küçük bir yerel Expo modülü yazıldı: `modules/thermal-state` (iOS `ProcessInfo.thermalState` + değişim bildirimi, Android 10+ `PowerManager` thermal status + dinleyici; Android'in 7 seviyesi iOS'un 4 seviyesine indirildi). Kayıt ekranında "serious" → turuncu "Telefon ısınıyor…", "critical" → kırmızı "Telefon çok sıcak…" bildirimi; "critical" iken kayda basınca uyarı penceresi. Android 9 ve altında ve modülün olmadığı eski build'lerde durum "unknown" → uyarı yok, uygulama çökmez.
+  - ⚠️ Yeni native kod: **yeni development build gerekiyor**. Native kod bu ortamda derlenemedi (Android SDK/Xcode yok); autolinking'in modülü bulduğu doğrulandı. Build hata verirse `modules/thermal-state/` klasörü silinip build alınabilir — JS tarafı modül yokken de çalışır (yalnız ısı uyarısı kapanır).
+  - Saf fonksiyonlar + testler: `storageSpace.ts`, `preRecordCheck.ts`, `thermal.ts`; Recorder entegrasyon testleri (uyarı, yine de kaydet, boyut sınırı, ısı bildirimleri).
+  - Cihazda nasıl test edilir (yeni dev build ile):
+    1. Build başarıyla alınıyor mu (iOS ve Android) — en önemli adım.
+    2. Kayıt → kayda bas: telefonda bol yer varsa uyarı çıkmadan 3-2-1 başlamalı.
+    3. Az yer testi: Ayarlar → kalite 4K seç. Telefonda boş alan ~5 GB'tan azsa uyarı çıkmalı (4K'da 10 dk ≈ 9 GB gerekir). Uyarıdaki dakika makul mü? "Vazgeç" kaydı başlatmamalı, "Yine de kaydet" başlatmalı.
+    4. (İsteğe bağlı) Yer bitme testi: büyük dosyalarla telefonu doldurup 4K kayıt al → kayıt kendiliğinden durmalı, "depolama neredeyse dolu — video kaydedildi" yazmalı, video galeride oynamalı.
+    5. Isı: telefonu ısıtmak zor; 4K'da 10–15 dk kayıt veya güneşte/şarjdayken dene. Dev build'de turuncu/kırmızı bildirim görülürse not al. Hiç görmezsen de sorun değil — asıl kontrol, uygulamanın açılıp kayıt yapabilmesi.
 - [ ] **PRM-25** Bluetooth kumanda / klavye — CİHAZ
   - Kabul: boşluk duraklatır, oklar hızı değiştirir, kayıt uzaktan başlar.
 - [ ] **PRM-26** Cihaz test matrisi — CİHAZ, FURKAN
