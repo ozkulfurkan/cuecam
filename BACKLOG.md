@@ -40,7 +40,7 @@ Claude bu dosyayı **yukarıdan aşağıya** işler. Sıra önemlidir; bir işin
     2. Telefonda QR kodu okut veya "Install" bağlantısını aç, APK'yı indir.
     3. "Bilinmeyen kaynaklardan yükleme" izni sorulursa tarayıcıya izin ver, kur.
     4. Uygulama Metro olmadan kendi başına açılmalı: koyu ekranda "Cue Cam / Prompter".
-- [ ] **PRM-4** Navigasyon iskeleti — BULUT
+- [x] **PRM-4** Navigasyon iskeleti — BULUT
   - Kabul: Senaryolar / Kayıt / Ayarlar sekmeleri; Kayıt tam ekran ayrı yığın; render testi geçiyor.
 - [ ] **PRM-5** Tasarım sistemi — BULUT, FURKAN
   - Kabul: `src/theme` (karanlık varsayılan + açık), Button/Card/IconButton/Slider/Screen; ekranlarda sabit renk/boyut yok.
