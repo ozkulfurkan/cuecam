@@ -42,9 +42,10 @@ Claude bu dosyayı **yukarıdan aşağıya** işler. Sıra önemlidir; bir işin
     4. Uygulama Metro olmadan kendi başına açılmalı: koyu ekranda "Cue Cam / Prompter".
 - [x] **PRM-4** Navigasyon iskeleti — BULUT
   - Kabul: Senaryolar / Kayıt / Ayarlar sekmeleri; Kayıt tam ekran ayrı yığın; render testi geçiyor.
-- [ ] **PRM-5** Tasarım sistemi — BULUT, FURKAN
+- [x] **PRM-5** Tasarım sistemi — BULUT, FURKAN
   - Kabul: `src/theme` (karanlık varsayılan + açık), Button/Card/IconButton/Slider/Screen; ekranlarda sabit renk/boyut yok.
   - Furkan'dan: 2 palet önerisinden birini seçmesi.
+  - Seçim: Palet A · Sinema (amber vurgu). Arayüz metinleri şimdilik İngilizce (TR çeviri PRM-20).
 - [ ] **PRM-6** Çökme raporlama (Sentry) — CİHAZ, FURKAN
   - Kabul: Sentry yapılandırılmış, DSN ortam değişkeninden; dev modda "Test çökmesi" butonu; olay panelde görünüyor.
   - Furkan'dan: Sentry hesabı ve DSN.

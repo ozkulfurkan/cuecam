@@ -1,9 +1,10 @@
 import { useRouter } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
-import { Pressable, StyleSheet, Text } from 'react-native';
+import { StyleSheet } from 'react-native';
 
+import { Button } from '@/components/Button';
 import { PlaceholderScreen } from '@/components/PlaceholderScreen';
-import { colors, fontSize, spacing } from '@/theme';
+import { spacing } from '@/theme';
 
 // Full-screen recorder; camera and prompter arrive in Sprint 2–3.
 export default function RecordScreen() {
@@ -13,28 +14,17 @@ export default function RecordScreen() {
     <>
       <StatusBar hidden />
       <PlaceholderScreen title="Record">
-        <Pressable
-          accessibilityRole="button"
+        <Button
+          label="Close"
+          variant="secondary"
           onPress={() => router.back()}
-          style={styles.closeButton}
-        >
-          <Text style={styles.closeLabel}>Close</Text>
-        </Pressable>
+          style={styles.close}
+        />
       </PlaceholderScreen>
     </>
   );
 }
 
 const styles = StyleSheet.create({
-  closeButton: {
-    marginTop: spacing.lg,
-    paddingVertical: spacing.sm,
-    paddingHorizontal: spacing.lg,
-    borderRadius: spacing.lg,
-    backgroundColor: colors.surface,
-  },
-  closeLabel: {
-    color: colors.text,
-    fontSize: fontSize.body,
-  },
+  close: { marginTop: spacing.lg },
 });

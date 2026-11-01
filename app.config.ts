@@ -4,7 +4,7 @@ const BUNDLE_ID = 'com.ozkulfurkan.cuecam';
 const EAS_PROJECT_ID = '94218dda-82ec-427f-8f8c-1017420af340';
 
 // Native config cannot import from src/theme (app.config.ts is evaluated by Node
-// without the app's module aliases), so this mirrors colors.background there.
+// without the app's module aliases), so this mirrors darkPalette.background there.
 const BACKGROUND = '#0B0B0F';
 
 // Permission prompts. English is the base language; Turkish comes from `locales`.

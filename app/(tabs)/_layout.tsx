@@ -2,7 +2,7 @@ import { Tabs, useRouter } from 'expo-router';
 import { SymbolView, type SymbolViewProps } from 'expo-symbols';
 import type { ColorValue } from 'react-native';
 
-import { colors, iconSize } from '@/theme';
+import { iconSize, useTheme } from '@/theme';
 
 // SF Symbols on iOS, Material Symbols on Android.
 function TabIcon({ name, color }: { name: SymbolViewProps['name']; color: ColorValue }) {
@@ -11,12 +11,13 @@ function TabIcon({ name, color }: { name: SymbolViewProps['name']; color: ColorV
 
 export default function TabsLayout() {
   const router = useRouter();
+  const { colors } = useTheme();
 
   return (
     <Tabs
       screenOptions={{
         headerShown: false,
-        tabBarActiveTintColor: colors.text,
+        tabBarActiveTintColor: colors.accent,
         tabBarInactiveTintColor: colors.textMuted,
         tabBarStyle: { backgroundColor: colors.surface, borderTopColor: colors.border },
       }}

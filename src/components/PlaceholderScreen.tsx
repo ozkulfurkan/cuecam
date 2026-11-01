@@ -1,7 +1,9 @@
 import type { ReactNode } from 'react';
-import { StyleSheet, Text, View } from 'react-native';
+import { Text } from 'react-native';
 
-import { colors, fontSize, spacing } from '@/theme';
+import { textStyles, useTheme } from '@/theme';
+
+import { Screen } from './Screen';
 
 type Props = {
   title: string;
@@ -11,32 +13,15 @@ type Props = {
 
 // Stand-in for screens whose real content lands in later PRM items.
 export function PlaceholderScreen({ title, subtitle, children }: Props) {
+  const { colors } = useTheme();
+
   return (
-    <View style={styles.container}>
-      <Text style={styles.title}>{title}</Text>
-      {subtitle ? <Text style={styles.subtitle}>{subtitle}</Text> : null}
+    <Screen centered>
+      <Text style={[textStyles.title, { color: colors.text }]}>{title}</Text>
+      {subtitle ? (
+        <Text style={[textStyles.body, { color: colors.textMuted }]}>{subtitle}</Text>
+      ) : null}
       {children}
-    </View>
+    </Screen>
   );
 }
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    alignItems: 'center',
-    justifyContent: 'center',
-    gap: spacing.sm,
-    padding: spacing.lg,
-    backgroundColor: colors.background,
-  },
-  title: {
-    color: colors.text,
-    fontSize: fontSize.title,
-    fontWeight: '700',
-  },
-  subtitle: {
-    color: colors.textMuted,
-    fontSize: fontSize.body,
-    textAlign: 'center',
-  },
-});
