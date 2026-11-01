@@ -1,6 +1,7 @@
 import { ConfigContext, ExpoConfig } from 'expo/config';
 
 const BUNDLE_ID = 'com.ozkulfurkan.cuecam';
+const EAS_PROJECT_ID = '94218dda-82ec-427f-8f8c-1017420af340';
 
 // Native config cannot import from src/theme (app.config.ts is evaluated by Node
 // without the app's module aliases), so this mirrors colors.background there.
@@ -32,6 +33,7 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
   ...config,
   name: 'Cue Cam',
   slug: 'cuecam',
+  owner: 'ozkulfurkan',
   version: '1.0.0',
   orientation: 'portrait',
   icon: './assets/images/icon.png',
@@ -77,5 +79,9 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
   experiments: {
     typedRoutes: true,
     reactCompiler: true,
+  },
+  extra: {
+    ...config.extra,
+    eas: { projectId: EAS_PROJECT_ID },
   },
 });

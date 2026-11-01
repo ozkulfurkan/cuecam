@@ -30,9 +30,16 @@ Claude bu dosyayı **yukarıdan aşağıya** işler. Sıra önemlidir; bir işin
     2. `npx expo run:android --device` → telefonu seç (ilk derleme birkaç dakika).
     3. Uygulama "Cue Cam" adıyla açılmalı: koyu splash → koyu ekranda "Cue Cam / Prompter".
     4. Metro'yu kapatıp `npm start` ile tekrar aç; uygulama yeniden bağlanabilmeli.
-- [ ] **PRM-3** EAS Build profilleri — CİHAZ, FURKAN
+- [~] **PRM-3** EAS Build profilleri — CİHAZ, FURKAN
   - Kabul: `eas.json` (development, preview, production); Android preview APK telefona kuruluyor; iOS internal distribution.
   - Furkan'dan: `eas login`, gerekirse EXPO_TOKEN.
+  - Durum: EAS projesi `@ozkulfurkan/cuecam`; Android keystore EAS'te; ilk preview derlemesi başlatıldı.
+  - Ertelendi: iOS internal distribution — Apple Developer hesabı alınınca yapılacak.
+  - Cihazda nasıl test edilir:
+    1. https://expo.dev/accounts/ozkulfurkan/projects/cuecam/builds adresinde son "preview" Android derlemesini aç.
+    2. Telefonda QR kodu okut veya "Install" bağlantısını aç, APK'yı indir.
+    3. "Bilinmeyen kaynaklardan yükleme" izni sorulursa tarayıcıya izin ver, kur.
+    4. Uygulama Metro olmadan kendi başına açılmalı: koyu ekranda "Cue Cam / Prompter".
 - [ ] **PRM-4** Navigasyon iskeleti — BULUT
   - Kabul: Senaryolar / Kayıt / Ayarlar sekmeleri; Kayıt tam ekran ayrı yığın; render testi geçiyor.
 - [ ] **PRM-5** Tasarım sistemi — BULUT, FURKAN
