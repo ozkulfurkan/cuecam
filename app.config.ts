@@ -57,6 +57,9 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
       monochromeImage: './assets/images/android-icon-monochrome.png',
     },
     predictiveBackGestureEnabled: false,
+    // VisionCamera v5 has no config plugin. iOS gets its prompts from infoPlist
+    // above; Android needs the manifest entries (dialog text comes from the OS).
+    permissions: ['android.permission.CAMERA', 'android.permission.RECORD_AUDIO'],
   },
   // Scoped under `ios`: unscoped keys would also become Android strings.xml entries
   // with no default-locale value, which fails Android's release lint (ExtraTranslation).

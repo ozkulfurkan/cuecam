@@ -45,8 +45,16 @@ Claude bu dosyayı **yukarıdan aşağıya** işler. Sıra önemlidir; bir işin
 
 ## Sprint 2 · Kamera ve kayıt (önkoşul: PRM-2)
 
-- [ ] **PRM-7** Kamera ve mikrofon izinleri — CİHAZ
+- [~] **PRM-7** Kamera ve mikrofon izinleri — CİHAZ
   - Kabul: izin akışı; reddedilince ayarlara yönlendirme; iOS izin metinleri TR/EN.
+  - Durum: VisionCamera 5 + Nitro; Kayıt ekranında izin kapısı. Android emülatörde (API 37) tam akış denendi: izin iste → kamera → mikrofon, ilk ret → tekrar sor, ikinci ret → "Open Settings" → izin verilip dönünce "Camera ready".
+  - Cihazda nasıl test edilir (Android telefon, yeni APK gerekir):
+    1. Uygulamayı kaldırıp yeni derlemeyi kur (izinler sıfırdan başlasın).
+    2. Kayıt sekmesine bas → "Camera and microphone" ekranı → "Allow access".
+    3. Önce kamera, sonra mikrofon izni sorulmalı; ikisine de izin ver → "Camera ready".
+    4. Telefon Ayarlar → Uygulamalar → Cue Cam → İzinler'den mikrofonu kapat, uygulamaya dön → Kayıt → "Microphone access is off" + "Open Settings".
+    5. "Open Settings" Cue Cam'in ayar sayfasını açmalı; mikrofonu aç, geri dön → ekran kendiliğinden "Camera ready" olmalı.
+  - iOS: izin metinleri TR/EN `app.config.ts`'te; Apple hesabı gelince iPhone'da aynı adımlar (Türkçe telefonda Türkçe metin görünmeli).
 - [ ] **PRM-8** Kamera önizleme — CİHAZ
   - Kabul: tam ekran önizleme, ön/arka geçişi, 30 fps.
 - [ ] **PRM-9** Video ve ses kaydı — CİHAZ
