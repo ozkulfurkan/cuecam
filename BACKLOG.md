@@ -199,8 +199,11 @@ Claude bu dosyayı **yukarıdan aşağıya** işler. Sıra önemlidir; bir işin
     4. **Page Down / Page Up** (veya sağ/sol ok) → metin 3 satır ileri/geri atlamalı.
     5. Elindeki ucuz kumandayı dene: hangi tuşu ne yapıyor? Çalışmayan tuş olursa, dev build'de Metro konsolunda `No mapping found for keyCode: …` uyarısındaki kodu bana yaz, eşlemeye ekleyeyim.
     6. Android'de ses tuşlarının hâlâ sesi değiştirdiğini kontrol et.
-- [ ] **PRM-26** Cihaz test matrisi — CİHAZ, FURKAN
+- [~] **PRM-26** Cihaz test matrisi — CİHAZ, FURKAN
   - Kabul: Samsung A, Xiaomi, eski Android, güncel iPhone, eski iPhone'da kayıt+kaydet akışı geçiyor; bulgular yeni PRM olarak bu dosyaya eklendi.
+  - Durum: kontrol listesi hazır → `docs/test-matrix.md`. PRM-7 … PRM-25 (+ PRM-27 ön kontrolü) her adım bir satır, her cihaz bir sütun (`[x]` geçti / `[!]` hata / `[-]` uygulanamaz); başta cihaz/build bilgi tablosu, cihaza özel dikkat notları, sonda Bulgular tablosu.
+  - Furkan'dan: testleri cihazlarda yapmak. Night-2 sonrası **yeni build** ile doldurulmalı (PRM-24/25 native kod ekledi). iOS sütunları Apple hesabı (PRM-3) gelene kadar `[-]`.
+  - Cihazda nasıl test edilir: `docs/test-matrix.md`'yi sırayla doldur; her `[!]` için Bulgular tablosuna ve buraya `BUG-<no>` ekle.
 - [ ] **PRM-27** Uzun kayıt performansı — CİHAZ
   - Kabul: 10 dk kayıtta kare düşmesi ve ses kayması yok.
 
