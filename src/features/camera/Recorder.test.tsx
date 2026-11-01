@@ -1,4 +1,5 @@
 import { act, fireEvent, render, screen } from '@testing-library/react-native';
+import * as mediaLibraryModule from 'expo-media-library';
 import * as visionCameraModule from 'react-native-vision-camera';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 
@@ -16,6 +17,12 @@ type MockRecorder = {
 const visionCamera = visionCameraModule as unknown as {
   setMockDevices: (positions: ('front' | 'back' | 'external')[]) => void;
   mockRecorders: MockRecorder[];
+};
+
+// Helpers from __mocks__/expo-media-library.ts.
+const mediaLibrary = mediaLibraryModule as unknown as {
+  setMockGalleryPermission: (current: { granted: boolean; canAskAgain: boolean }) => void;
+  mockGallery: { albums: Map<string, string[]> };
 };
 
 jest.mock('expo-router', () => ({ useIsFocused: () => true }));
@@ -42,6 +49,8 @@ const pressButton = (name: string | RegExp) =>
 afterEach(() => {
   visionCamera.setMockDevices(['front', 'back']);
   visionCamera.mockRecorders.length = 0;
+  mediaLibrary.mockGallery.albums.clear();
+  mediaLibrary.setMockGalleryPermission({ granted: true, canAskAgain: true });
   jest.useRealTimers();
 });
 
@@ -113,7 +122,32 @@ describe('recording', () => {
 
     expect(screen.getByRole('button', { name: 'Start recording' })).toBeTruthy();
     expect(onBusyChange).toHaveBeenLastCalledWith(false);
-    expect(screen.getByText(/Recorded 01:05/)).toBeTruthy();
+  });
+
+  it('saves the finished recording to the Prompter album', async () => {
+    await renderRecorder();
+
+    await pressButton('Start recording');
+    const recorder = latestRecorder();
+    await pressButton('Stop recording');
+    await act(() => recorder.finishNow());
+
+    expect(await screen.findByText('Saved to the "Prompter" album')).toBeTruthy();
+    expect(mediaLibrary.mockGallery.albums.get('Prompter')).toEqual([
+      `file://${recorder.filePath}`,
+    ]);
+  });
+
+  it('offers Settings when gallery access is blocked', async () => {
+    mediaLibrary.setMockGalleryPermission({ granted: false, canAskAgain: false });
+    await renderRecorder();
+
+    await pressButton('Start recording');
+    await pressButton('Stop recording');
+    await act(() => latestRecorder().finishNow());
+
+    expect(await screen.findByText(/allow Photos access in Settings/)).toBeTruthy();
+    expect(screen.getByRole('button', { name: 'Open Settings' })).toBeTruthy();
   });
 
   it('uses a new recorder (and file) for each recording', async () => {

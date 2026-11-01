@@ -75,6 +75,17 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
     // Uploads source maps on EAS builds; the token comes from SENTRY_AUTH_TOKEN.
     ['@sentry/react-native/expo', { organization: 'ozkulfurkan', project: 'cuecam' }],
     [
+      'expo-media-library',
+      {
+        // Keep our own iOS prompts (the plugin would otherwise add generic ones).
+        photosPermission: permissions.en.NSPhotoLibraryUsageDescription,
+        savePhotosPermission: permissions.en.NSPhotoLibraryAddUsageDescription,
+        // Only videos are saved: request READ_MEDIA_VIDEO on Android 13+, not
+        // photo/audio access too.
+        granularPermissions: ['video'],
+      },
+    ],
+    [
       'expo-splash-screen',
       {
         backgroundColor: BACKGROUND,

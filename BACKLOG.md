@@ -74,8 +74,18 @@ Claude bu dosyayı **yukarıdan aşağıya** işler. Sıra önemlidir; bir işin
     3. Saniyeyi yüksek sesle sayarak ~20 sn konuş, kareye basıp durdur → dev build'de altta "Recorded 00:20 → …mp4" görünür.
     4. Galeriye kaydetme PRM-10'da geldiğinde: videoyu aç, dudak hareketi ile ses aynı anda olmalı; video bilgisinde 1080×1920 görünmeli, ses net (telefon kalitesi değil) olmalı.
     5. Arka arkaya 3 kısa kayıt al; her biri ayrı dosya olmalı, uygulama donmamalı.
-- [ ] **PRM-10** Galeriye kaydetme — CİHAZ
+- [~] **PRM-10** Galeriye kaydetme — CİHAZ
   - Kabul: video "Prompter" albümünde; eski Android, yeni Android ve iOS'ta çalışıyor.
+  - Durum: kayıt bitince video "Prompter" albümüne kaydedilir (yoksa oluşturulur), sonra uygulamanın geçici kopyası silinir. Galeri izni ilk kayıt bitiminde istenir; reddedilirse mesaj + "Open Settings". İzinler yalnızca video için (Android 13+ READ_MEDIA_VIDEO; eski Android depolama izni; iOS fotoğraf arşivi, TR/EN metin).
+  - Android emülatörde (API 37 = yeni Android) doğrulandı: izin penceresi → "Saved to the "Prompter" album"; 3 kayıt `Pictures/Prompter/` altında, geçici klasör boş.
+  - Cihazda nasıl test edilir:
+    1. Uygulamayı kaldırıp yeni APK'yı kur. Kayıt → kısa bir video çek → durdur.
+    2. Galeri izni sorulmalı → "Allow all" → altta "Saved to the "Prompter" album".
+    3. Telefonun Galeri/Fotoğraflar uygulamasında "Prompter" albümünü aç; video orada ve oynuyor olmalı. Videonun bilgilerinde 1080×1920 ve net ses olmalı (PRM-9 doğrulaması).
+    4. İkinci bir video çek → aynı albüme eklenmeli (ikinci "Prompter" albümü oluşmamalı).
+    5. Ayarlar → Uygulamalar → Cue Cam → İzinler → Fotoğraflar ve videolar → "İzin verme"; yeni kayıt → "Not saved…" mesajı + "Open Settings" düğmesi.
+    6. Eski Android (9 veya altı) cihaz varsa aynı adımlar: izin penceresi "dosyalara erişim" olarak görünür.
+    7. iOS: Apple hesabı gelince aynı adımlar; Fotoğraflar → Albümler → "Prompter".
 - [ ] **PRM-11** Ön kamera ayna ayarı — CİHAZ
   - Kabul: önizleme aynalı; kaydın aynalı olup olmayacağı seçilebiliyor.
 

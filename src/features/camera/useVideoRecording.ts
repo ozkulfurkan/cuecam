@@ -7,6 +7,7 @@ import {
   canStopRecording,
   initialRecordingState,
   recordingReducer,
+  type FinishedRecording,
 } from './recording';
 
 // The counter only drives on-screen text, so a JS timer is fine here (unlike
@@ -15,7 +16,12 @@ const ELAPSED_POLL_MS = 250;
 
 const errorMessage = (error: unknown) => (error instanceof Error ? error.message : String(error));
 
-export function useVideoRecording(videoOutput: CameraVideoOutput) {
+type Options = {
+  /** Called once a recording's file is fully written. */
+  onFinished?: (recording: FinishedRecording) => void;
+};
+
+export function useVideoRecording(videoOutput: CameraVideoOutput, { onFinished }: Options = {}) {
   const [state, dispatch] = useReducer(recordingReducer, initialRecordingState);
   const [elapsedSeconds, setElapsedSeconds] = useState(0);
   const recorderRef = useRef<Recorder | undefined>(undefined);
@@ -45,16 +51,14 @@ export function useVideoRecording(videoOutput: CameraVideoOutput) {
     setElapsedSeconds(0);
     lastElapsedRef.current = 0;
     try {
-      // One Recorder per file; it writes to a temporary file that PRM-10 moves
-      // into the gallery.
+      // One Recorder per file; it writes to a temporary file in the app cache.
       const recorder = await videoOutput.createRecorder({});
       recorderRef.current = recorder;
       await recorder.startRecording((path) => {
         recorderRef.current = undefined;
-        dispatch({
-          type: 'finished',
-          recording: { path, durationSeconds: lastElapsedRef.current },
-        });
+        const recording = { path, durationSeconds: lastElapsedRef.current };
+        dispatch({ type: 'finished', recording });
+        onFinished?.(recording);
       }, fail);
       dispatch({ type: 'started' });
     } catch (error) {

@@ -1,16 +1,21 @@
 import { useEffect, useMemo, useState } from 'react';
-import { StyleSheet, Text, View } from 'react-native';
+import { Linking, StyleSheet, Text, View } from 'react-native';
 import { CommonResolutions, useCameraDevices, useVideoOutput } from 'react-native-vision-camera';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
+import { Button } from '@/components/Button';
 import { IconButton } from '@/components/IconButton';
 import { radius, spacing, textStyles, useTheme } from '@/theme';
 
 import { CameraPreview } from './CameraPreview';
+import { saveResultMessage, type SaveResult } from './gallery';
 import { canSwitchPosition, DEFAULT_POSITION, otherPosition, type LensPosition } from './preview';
 import { RecordButton } from './RecordButton';
-import { formatDuration, isRecordingBusy } from './recording';
+import { formatDuration, isRecordingBusy, type FinishedRecording } from './recording';
+import { saveToGallery } from './saveToGallery';
 import { useVideoRecording } from './useVideoRecording';
+
+type SaveStatus = { kind: 'saving' } | SaveResult;
 
 type Props = {
   /** Reports when recording starts/ends so the screen can lock its own controls. */
@@ -31,7 +36,14 @@ export function Recorder({ onBusyChange }: Props) {
   // A stable array: a new one each render would reconfigure the camera session
   // on every timer tick while recording.
   const outputs = useMemo(() => [videoOutput], [videoOutput]);
-  const { state, elapsedSeconds, start, stop } = useVideoRecording(videoOutput);
+  const [saveStatus, setSaveStatus] = useState<SaveStatus>();
+  const saveRecording = async (recording: FinishedRecording) => {
+    setSaveStatus({ kind: 'saving' });
+    setSaveStatus(await saveToGallery(recording.path));
+  };
+  const { state, elapsedSeconds, start, stop } = useVideoRecording(videoOutput, {
+    onFinished: saveRecording,
+  });
   const busy = isRecordingBusy(state);
   const isRecording = state.status === 'recording';
 
@@ -81,17 +93,25 @@ export function Recorder({ onBusyChange }: Props) {
             {`Recording failed: ${state.error}`}
           </Text>
         ) : null}
-        {__DEV__ && state.lastRecording && !busy ? (
-          // Dev-only until PRM-10 saves recordings to the gallery.
+        {saveStatus && !busy ? (
           <Text
+            accessibilityLiveRegion="polite"
             style={[
               textStyles.caption,
               styles.notice,
               { color: colors.text, backgroundColor: colors.surface },
             ]}
           >
-            {`Recorded ${formatDuration(state.lastRecording.durationSeconds)} → ${state.lastRecording.path}`}
+            {saveStatus.kind === 'saving' ? 'Saving to gallery…' : saveResultMessage(saveStatus)}
           </Text>
+        ) : null}
+        {saveStatus?.kind === 'permission-denied' && saveStatus.canOpenSettings && !busy ? (
+          <Button
+            label="Open Settings"
+            variant="secondary"
+            // Opens this app's page in system Settings on both iOS and Android.
+            onPress={() => Linking.openSettings()}
+          />
         ) : null}
         <RecordButton
           isRecording={isRecording}
