@@ -204,8 +204,21 @@ Claude bu dosyayı **yukarıdan aşağıya** işler. Sıra önemlidir; bir işin
   - Durum: kontrol listesi hazır → `docs/test-matrix.md`. PRM-7 … PRM-25 (+ PRM-27 ön kontrolü) her adım bir satır, her cihaz bir sütun (`[x]` geçti / `[!]` hata / `[-]` uygulanamaz); başta cihaz/build bilgi tablosu, cihaza özel dikkat notları, sonda Bulgular tablosu.
   - Furkan'dan: testleri cihazlarda yapmak. Night-2 sonrası **yeni build** ile doldurulmalı (PRM-24/25 native kod ekledi). iOS sütunları Apple hesabı (PRM-3) gelene kadar `[-]`.
   - Cihazda nasıl test edilir: `docs/test-matrix.md`'yi sırayla doldur; her `[!]` için Bulgular tablosuna ve buraya `BUG-<no>` ekle.
-- [ ] **PRM-27** Uzun kayıt performansı — CİHAZ
+- [~] **PRM-27** Uzun kayıt performansı — CİHAZ
   - Kabul: 10 dk kayıtta kare düşmesi ve ses kayması yok.
+  - Durum — gereksiz render: kayıt süresi sayacı saniyede 4 kez kesirli değer yazıp tüm kayıt ekranını saniyede 4 kez yeniden çiziyordu; artık tam saniye tutuluyor (saniyede 1 render, test: 10 sn'de ≤ 11 commit). Kesinti/kumanda dinleyicileri sabit fonksiyonlarla bir kez abone oluyor (her render'da yeniden abone olmuyor). VisionCamera'nın kendi dinleyicileri zaten sabit (kaynakta kontrol edildi).
+  - Durum — UI thread: akış `useFrameCallback` + `useAnimatedStyle` ile; test, 10 sn'lik karede Prompter'ın React tarafında hiç yeniden çizilmediğini doğruluyor. Kumanda "atlama"sı da UI thread'deki kare geri çağrısında uygulanıyor.
+  - Durum — sızıntı denetimi: tüm `AppState`/yön/ısı/tuş abonelikleri ve zamanlayıcılar (`setInterval`, `setTimeout`, `requestAnimationFrame`) ekran kapanınca temizleniyor; performans paneli için test var.
+  - Geliştirme modu performans paneli (yalnız `__DEV__`): kayıt ekranında, yazı kutusunun altında (yatayda kontrol tarafında) iki satır: `UI 60 (min 57) · JS 59 (min 41)` ve `drop 3 · heap 42 MB · 02:14`. UI = akışın çalıştığı thread'in FPS'i, JS = JS thread FPS'i, min = en kötü 1 saniye, drop = kaçan UI kareleri (60/120 Hz ekranı kendisi öğrenir), heap = Hermes JS belleği (10 dk boyunca sürekli artıyorsa sızıntı), süre = son kayıt başından beri. Her yeni kayıtta sıfırlanır.
+  - Not: dev build'de JS FPS normalden düşük görünür (geliştirme modu yavaştır); asıl ölçüt UI FPS ve drop. Kesin sonuç için aynı test preview APK'da (panelsiz) videoya bakılarak yapılır.
+  - Cihazda nasıl test edilir (dev build; telefon şarjda değil, oda sıcaklığında):
+    1. Ayarlar → 1080p. Uzun bir senaryo seç (10 dk'lık metin; yoksa birkaç kez yapıştır), hız 4.
+    2. Kayıt → başla. Paneldeki ilk değerleri not al (UI/JS FPS, heap).
+    3. 10 dk kayıt yap; 1., 5. ve 10. dakikada paneli not al (veya ekran görüntüsü).
+    4. Beklenen: UI ≈ ekran hızı (60 veya 120), UI min ≥ ~50, drop 10 dk'da birkaç düzineyi geçmiyor; heap dalgalanabilir ama sürekli tırmanmıyor; akış gözle takılmıyor.
+    5. Kaydı durdur → galeride videonun sonuna git: dudak ile ses hâlâ senkron mu (saniye sayarak konuş)? Videonun süresi ekrandaki sayaçla aynı mı?
+    6. Aynısını preview APK ile (panel yok) bir kez daha yapıp videoda kare atlama olup olmadığına bak.
+    7. Sonuçları `docs/test-matrix.md` 27.1 satırına ve buraya yaz.
 
 ## Sprint 6 · Yayın
 

@@ -59,7 +59,10 @@ export function useVideoRecording(videoOutput: CameraVideoOutput, { onFinished }
     const timer = setInterval(() => {
       const seconds = recorderRef.current?.recordedDuration ?? 0;
       lastElapsedRef.current = seconds;
-      setElapsedSeconds(seconds);
+      // The screen shows whole seconds. Storing the whole second means React
+      // skips the update (same value) on 3 of every 4 polls, instead of
+      // re-rendering the whole recorder 4 times a second for a long take.
+      setElapsedSeconds(Math.floor(seconds));
     }, ELAPSED_POLL_MS);
     return () => clearInterval(timer);
   }, [state.status]);

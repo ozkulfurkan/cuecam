@@ -19,6 +19,7 @@ import { PrompterControls } from '@/features/prompter/PrompterControls';
 import { JUMP_LINES, type KeyAction } from '@/features/prompter/keyBindings';
 import { useCountdown } from '@/features/prompter/useCountdown';
 import { useHardwareKeys } from '@/features/prompter/useHardwareKeys';
+import { PerfPanel } from '@/features/perf/PerfPanel';
 import { usePrompterSettings } from '@/features/prompter/usePrompterSettings';
 import { useI18n } from '@/i18n/I18nProvider';
 import { whenAppActive } from '@/lib/whenAppActive';
@@ -225,6 +226,12 @@ export function Recorder({ text, onBusyChange }: Props) {
     // In landscape the box reaches the bottom; keep the label on screen.
     window.height - insets.bottom - spacing.xl - spacing.md,
   );
+  // Dev performance panel: under the "Paused" label in portrait; in landscape
+  // (box full height) at the top of the controls side.
+  const perfPanelPosition =
+    cameraSide === 'top'
+      ? { top: pausedLabelTop + spacing.xl + spacing.sm, left: box.left }
+      : { top: box.top, left: controls.left + spacing.md };
 
   return (
     <View style={StyleSheet.absoluteFill}>
@@ -265,6 +272,8 @@ export function Recorder({ text, onBusyChange }: Props) {
           {t('recorder.paused')}
         </Text>
       ) : null}
+
+      {__DEV__ ? <PerfPanel resetKey={restartKey} style={perfPanelPosition} /> : null}
 
       {countdown.value !== undefined ? (
         <View style={styles.countdown} pointerEvents="none">

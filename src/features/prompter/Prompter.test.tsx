@@ -1,4 +1,5 @@
 import { act, fireEvent, render, screen } from '@testing-library/react-native';
+import { Profiler } from 'react';
 import { StyleSheet } from 'react-native';
 import * as reanimatedModule from 'react-native-reanimated';
 
@@ -88,4 +89,33 @@ it('reports taps so the screen can pause and resume', async () => {
   await render(<Prompter {...props({ onPress })} />);
   await fireEvent.press(screen.getByRole('button', { name: 'Script' }));
   expect(onPress).toHaveBeenCalledTimes(1);
+});
+
+describe('UI-thread scrolling', () => {
+  it('scrolls without re-rendering React (no JS work per frame)', async () => {
+    const onRender = jest.fn();
+    const view = await render(
+      <Profiler id="prompter" onRender={onRender}>
+        <Prompter {...props({ playing: true })} />
+      </Profiler>,
+    );
+    const scroller = screen.getByTestId('prompter-text').parent!;
+    await fireEvent(scroller, 'layout', { nativeEvent: { layout: { height: 5000 } } });
+    onRender.mockClear();
+
+    // Ten seconds of frames: the offset moves on the UI thread only.
+    await act(() => reanimated.mockRunFrames(600, 1000 / 60));
+    expect(onRender).not.toHaveBeenCalled();
+
+    // The offset did move (visible once React renders again).
+    await view.rerender(
+      <Profiler id="prompter" onRender={onRender}>
+        <Prompter {...props({ playing: true })} />
+      </Profiler>,
+    );
+    const { transform } = StyleSheet.flatten(
+      screen.getByTestId('prompter-text').parent!.props.style,
+    ) as { transform: { translateY: number }[] };
+    expect(-transform[0].translateY).toBeGreaterThan(0);
+  });
 });
