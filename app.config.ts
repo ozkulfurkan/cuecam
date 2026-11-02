@@ -29,6 +29,55 @@ const permissions = {
   },
 };
 
+// App Store privacy manifest (PrivacyInfo.xcprivacy). Libraries ship their own;
+// this declares what the app as a whole collects (Sentry crash and performance
+// and diagnostic reports, not linked to the user, no tracking) and the "required reason" APIs
+// used by app code: settings storage, file dates of recordings, free disk space
+// before recording (preRecordCheck) and uptime-based timers.
+// Keep in sync with store/privacy-labels.md.
+const privacyManifests = {
+  NSPrivacyTracking: false,
+  NSPrivacyTrackingDomains: [],
+  NSPrivacyCollectedDataTypes: [
+    {
+      NSPrivacyCollectedDataType: 'NSPrivacyCollectedDataTypeCrashData',
+      NSPrivacyCollectedDataTypeLinked: false,
+      NSPrivacyCollectedDataTypeTracking: false,
+      NSPrivacyCollectedDataTypePurposes: ['NSPrivacyCollectedDataTypePurposeAppFunctionality'],
+    },
+    {
+      NSPrivacyCollectedDataType: 'NSPrivacyCollectedDataTypePerformanceData',
+      NSPrivacyCollectedDataTypeLinked: false,
+      NSPrivacyCollectedDataTypeTracking: false,
+      NSPrivacyCollectedDataTypePurposes: ['NSPrivacyCollectedDataTypePurposeAppFunctionality'],
+    },
+    {
+      NSPrivacyCollectedDataType: 'NSPrivacyCollectedDataTypeOtherDiagnosticData',
+      NSPrivacyCollectedDataTypeLinked: false,
+      NSPrivacyCollectedDataTypeTracking: false,
+      NSPrivacyCollectedDataTypePurposes: ['NSPrivacyCollectedDataTypePurposeAppFunctionality'],
+    },
+  ],
+  NSPrivacyAccessedAPITypes: [
+    {
+      NSPrivacyAccessedAPIType: 'NSPrivacyAccessedAPICategoryUserDefaults',
+      NSPrivacyAccessedAPITypeReasons: ['CA92.1'],
+    },
+    {
+      NSPrivacyAccessedAPIType: 'NSPrivacyAccessedAPICategoryFileTimestamp',
+      NSPrivacyAccessedAPITypeReasons: ['C617.1'],
+    },
+    {
+      NSPrivacyAccessedAPIType: 'NSPrivacyAccessedAPICategoryDiskSpace',
+      NSPrivacyAccessedAPITypeReasons: ['E174.1'],
+    },
+    {
+      NSPrivacyAccessedAPIType: 'NSPrivacyAccessedAPICategorySystemBootTime',
+      NSPrivacyAccessedAPITypeReasons: ['35F9.1'],
+    },
+  ],
+};
+
 export default ({ config }: ConfigContext): ExpoConfig => ({
   ...config,
   name: 'Cue Cam',
@@ -44,11 +93,16 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
   backgroundColor: BACKGROUND,
   ios: {
     bundleIdentifier: BUNDLE_ID,
-    icon: './assets/expo.icon',
+    // Video recording needs a real camera; the app is not laid out for iPad.
+    supportsTablet: false,
     infoPlist: {
       ...permissions.en,
       CFBundleAllowMixedLocalizations: true,
+      // Only HTTPS (Sentry) is used, which is exempt: skips the export
+      // compliance question on every App Store Connect upload.
+      ITSAppUsesNonExemptEncryption: false,
     },
+    privacyManifests,
   },
   android: {
     package: BUNDLE_ID,
@@ -92,7 +146,7 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
       {
         backgroundColor: BACKGROUND,
         image: './assets/images/splash-icon.png',
-        imageWidth: 76,
+        imageWidth: 200,
       },
     ],
   ],

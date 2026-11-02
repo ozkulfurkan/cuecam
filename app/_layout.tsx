@@ -12,6 +12,7 @@ import { StyleSheet } from 'react-native';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 
 import { APP_LOCK } from '@/features/camera/orientation';
+import { useOnboardingCompleted } from '@/features/onboarding/onboardingStore';
 import { I18nProvider, useI18n } from '@/i18n/I18nProvider';
 import { buildSentryOptions } from '@/lib/monitoring';
 import { ThemeProvider, useTheme } from '@/theme';
@@ -31,6 +32,7 @@ lockAsync(APP_LOCK).catch(Sentry.captureException);
 function RootStack() {
   const { scheme, colors } = useTheme();
   const { t } = useI18n();
+  const onboarded = useOnboardingCompleted();
   const base = scheme === 'dark' ? DarkTheme : DefaultTheme;
   const navigationTheme = {
     ...base,
@@ -49,14 +51,21 @@ function RootStack() {
     <NavigationThemeProvider value={navigationTheme}>
       <StatusBar style={scheme === 'dark' ? 'light' : 'dark'} />
       <Stack screenOptions={{ headerShown: false }}>
-        <Stack.Screen name="(tabs)" />
-        {/* Recording covers the whole screen, outside the tab bar. */}
-        <Stack.Screen name="record" options={{ presentation: 'fullScreenModal' }} />
-        <Stack.Screen
-          name="script/[id]"
-          options={{ headerShown: true, title: t('editor.title') }}
-        />
-        <Stack.Screen name="recording/[id]" options={{ presentation: 'fullScreenModal' }} />
+        {/* Until the intro is done it is the only route; completing it (or
+            restarting it from Settings) flips the guards and navigates. */}
+        <Stack.Protected guard={!onboarded}>
+          <Stack.Screen name="onboarding" options={{ gestureEnabled: false }} />
+        </Stack.Protected>
+        <Stack.Protected guard={onboarded}>
+          <Stack.Screen name="(tabs)" />
+          {/* Recording covers the whole screen, outside the tab bar. */}
+          <Stack.Screen name="record" options={{ presentation: 'fullScreenModal' }} />
+          <Stack.Screen
+            name="script/[id]"
+            options={{ headerShown: true, title: t('editor.title') }}
+          />
+          <Stack.Screen name="recording/[id]" options={{ presentation: 'fullScreenModal' }} />
+        </Stack.Protected>
       </Stack>
     </NavigationThemeProvider>
   );

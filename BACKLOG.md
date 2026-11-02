@@ -248,17 +248,40 @@ Claude bu dosyayı **yukarıdan aşağıya** işler. Sıra önemlidir; bir işin
 
 ## Sprint 6 · Yayın
 
-- [ ] **PRM-28** İkon, açılış ekranı, uygulama adı — BULUT, FURKAN
-- [ ] **PRM-29** İlk açılış rehberi — BULUT
+- [~] **PRM-28** İkon, açılış ekranı, uygulama adı — BULUT, FURKAN
+  - Durum: ad `Cue Cam` (PRM-2'de seçildi). Yeni ikon: koyu zemin, amber kamera lensi + kırmızı kayıt noktası, altında akan senaryo satırları (lensin altında okuma fikri). Tek kaynak `assets/source/glyph.svg`; tüm PNG'ler `scripts/generate-icons.mjs` ile üretiliyor (iOS/genel ikon 1024, Android adaptive ön/arka/tek renk, açılış ekranı, favicon, Play ikonu 512 ve Play öne çıkan görsel 1024×500 → `store/graphics/`). Varsayılan Expo `expo.icon` kaldırıldı; iOS da `icon.png` kullanıyor. Açılış ekranında glif 200 pt.
+  - Yayın ayarları: iPad kapalı (`supportsTablet: false` → iPad ekran görüntüsü gerekmez), `ITSAppUsesNonExemptEncryption: false` (her yüklemede şifreleme sorusu çıkmaz), iOS gizlilik manifesti (`privacyManifests`).
+  - Furkan'dan: ikon tasarımını onayla (beğenmezsen SVG'yi değiştirip komutu yeniden çalıştırmak yeterli).
+  - Cihazda nasıl test edilir (yeni preview APK gerekir — native değişiklik):
+    1. Eski uygulamayı kaldır, yeni APK'yı kur.
+    2. Ana ekranda ikon: koyu zemin, turuncu lens, altında 3 çizgi; kenarlar kırpılmamış (yuvarlak/kare launcher'larda da).
+    3. Android 13+: Ayarlar → Duvar kağıdı → "Temalı simgeler" açıkken ikon tek renk görünmeli.
+    4. Uygulamayı soğuk başlat: koyu zeminde ortada ikon glifi, ardından Senaryolar ekranı; beyaz flaş olmamalı.
+- [x] **PRM-29** İlk açılış rehberi — BULUT
   - Kabul: 3 ekranlık tanıtım + izinlerin neden istendiği.
-- [ ] **PRM-30** Gizlilik politikası ve veri formları — FURKAN
+  - Durum: ilk açılışta `app/onboarding.tsx` (Kayıt yaparken oku → Hızı sen belirlersin → Cue Cam neden izin ister?). Son sayfa kamera/mikrofon/fotoğraf izinlerinin nedenini yazıyor ve "Kamera ve mikrofona izin ver" ile sistem diyaloglarını açıyor (ret de olsa uygulamaya geçer); "Şimdi değil"/"Geç" hiçbir şey sormaz. Fotoğraf izni yine ilk kayıtta sorulur. Tamamlanma MMKV'de (`onboarding.completed.v1`); kök navigasyon `Stack.Protected` ile rehber bitene kadar sekmeleri kapatıyor. Ayarlar → Hakkında: "Tanıtımı yeniden göster", "Gizlilik politikası", "Destek ile iletişim", sürüm.
+  - Telefonda bakılacak (yeni APK ile): uygulamayı silip kur → rehber açılmalı, 3 sayfa, son sayfada izin diyalogları sırayla; Ayarlar → Tanıtımı yeniden göster rehberi tekrar açmalı.
+- [~] **PRM-30** Gizlilik politikası ve veri formları — FURKAN
   - Kabul: yayında gizlilik sayfası; App Store gizlilik etiketleri ve Play "Veri güvenliği" formu dolu.
-- [ ] **PRM-31** Mağaza listeleri — BULUT, FURKAN
+  - Durum: gizlilik politikası TR/EN (`docs/privacy/`), destek sayfası + SSS TR/EN (`docs/support/`), basit tanıtım sayfası (`docs/index.html`). GitHub Pages ile yayınlanacak: `https://ozkulfurkan.github.io/cuecam/privacy/`. Uygulamada Ayarlar → Hakkında'dan açılıyor (dile göre TR/EN). Form cevapları hazır: `store/privacy-labels.md` (App Store), `store/data-safety.md` (Play), diğer Play "App content" cevapları `store/play-console.md`. iOS gizlilik manifesti aynı beyanla `app.config.ts`'te.
+  - İletişim olarak GitHub Issues kullanıldı (e-postanı herkese açık sayfaya koymadım); istersen politikaya e-posta ekle.
+  - Furkan'dan:
+    1. GitHub → repo → Settings → Pages → Source: "Deploy from a branch", Branch: `main`, klasör `/docs` → Save. (Bu branch `main`'e birleşince.) 1–2 dk sonra linki aç.
+    2. Sentry → cuecam → Settings → Security & Privacy → "Prevent Storing of IP Addresses" aç.
+    3. Formları dosyalardaki cevaplarla doldur (App Store Connect'te ve Play Console'da).
+    4. ⚠️ Play "Photo and video permissions" beyanı — `store/play-console.md`'deki metni kullan.
+- [~] **PRM-31** Mağaza listeleri — BULUT, FURKAN
   - Kabul: ekran görüntüleri, TR/EN açıklama, anahtar kelimeler (metinler `store/` klasöründe).
-- [ ] **PRM-32** Kapalı test — CİHAZ, FURKAN
+  - Durum: TR/EN metinler `store/listings.json` (App Store: ad "Cue Cam: Teleprompter Video" / "Cue Cam: Prompter Kamera", alt başlık, tanıtım metni, açıklama, anahtar kelimeler, yenilikler; Play: başlık, kısa ve uzun açıklama). Karakter sınırları ve anahtar kelime kuralları (100 bayt, tekrar yok, ad/alt başlıktaki kelimeler yok) `store/listings.test.ts` ile denetleniyor. Play ikonu ve öne çıkan görsel `store/graphics/`. Ekran görüntüleri için çekim listesi ve çerçeveleme betiği: `store/README.md`, `scripts/frame-screenshots.mjs` (App Store 1290×2796, Play 1080×1920, başlıklı).
+  - Furkan'dan: metinleri oku/onayla; telefonda 6+6 ham ekran görüntüsü al → `store/README.md` adımları. App Store'da "Cue Cam" adı alınmışsa adı `listings.json`'da değiştir (test sınırı kontrol eder).
+- [~] **PRM-32** Kapalı test — CİHAZ, FURKAN
   - Kabul: TestFlight ve Play kapalı testi tamam, kritik hata yok.
+  - Durum (hazırlık): `eas.json` — her derleme profili kendi EAS ortamını kullanıyor (production derlemesi production ortamındaki Sentry DSN'ini alır), production Android AAB; gönderim profilleri `production` (Play dahili test, taslak), `closed-test` (Play kapalı test "alpha") ve `store` (Play üretim, taslak). Adım adım rehber: `docs/RELEASE.md` (Adım 0–5 Android, Adım 7 iOS/TestFlight).
+  - ⚠️ Yeni kişisel Play hesaplarında üretimden önce 12 test kullanıcısıyla 14 gün kapalı test zorunlu; ilk AAB Play Console'a elle yüklenmeli.
+  - Furkan'dan: `docs/RELEASE.md` Adım 0–5; iOS için Apple Developer üyeliği.
 - [ ] **PRM-33** Mağazalara gönderim — FURKAN
   - Kabul: EAS Submit ile iki mağazaya gönderildi.
+  - Hazırlık: komutlar ve App Store Connect alanları `docs/RELEASE.md` Adım 6–7'de. Önkoşul: PRM-32.
 
 ---
 

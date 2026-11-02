@@ -52,3 +52,6 @@ coverage/
 # generated native folders
 /ios
 /android
+
+# store API keys (Play service account JSON etc.); upload them to EAS instead
+secrets/

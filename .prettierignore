@@ -5,4 +5,5 @@ coverage
 android
 ios
 package-lock.json
-assets/expo.icon
+docs/**/*.html
+docs/*.html

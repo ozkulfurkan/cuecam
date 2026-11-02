@@ -9,6 +9,7 @@ export {
 } from './scheme';
 export { ThemeProvider, useTheme, type Theme } from './ThemeProvider';
 export {
+  dotSize,
   fontSize,
   frameBorderWidth,
   iconSize,

@@ -116,6 +116,38 @@ export const tr: Record<StringKey, string> = {
   'settings.testCrash': 'Test çökmesi',
   'settings.testCrashHint': 'Sentry’nin hatayı aldığını görmek için bir hata fırlatır',
 
+  'settings.about': 'Hakkında',
+  'settings.showIntro': 'Tanıtımı yeniden göster',
+  'settings.privacyPolicy': 'Gizlilik politikası',
+  'settings.contact': 'Destek ile iletişim',
+  'settings.version': 'Sürüm {version}',
+
+  'onboarding.welcomeTitle': 'Kayıt yaparken oku',
+  'onboarding.welcomeBody':
+    'Senaryon kameranın hemen altında akar; videoda doğrudan izleyicine bakıyormuş gibi görünürsün.',
+  'onboarding.welcomePoint1': 'Senaryonu yaz ya da yapıştır, sonra kayda bas',
+  'onboarding.welcomePoint2': 'Videolar galerindeki "Prompter" albümüne kaydedilir',
+  'onboarding.controlsTitle': 'Hızı sen belirlersin',
+  'onboarding.controlsBody': 'Kayıt sırasında yazı basit hareketlerle yönetilir:',
+  'onboarding.controlsPoint1': 'Duraklatmak ya da devam etmek için yazıya dokun',
+  'onboarding.controlsPoint2': '2 kat hızlı akıtmak için ekrana basılı tut',
+  'onboarding.controlsPoint3': 'Hızı ve yazı boyutunu kaydırıcılarla değiştir',
+  'onboarding.controlsPoint4': 'Kayıttan önce yazı kutusunu sürükleyerek taşı veya boyutlandır',
+  'onboarding.privacyTitle': 'Cue Cam neden izin ister?',
+  'onboarding.privacyBody':
+    'Senaryoların ve videoların telefonunda kalır. Cue Cam’de hesap yoktur ve hiçbir şey yüklenmez.',
+  'onboarding.privacyCamera': 'Kamera — sen okurken seni çekmek için',
+  'onboarding.privacyMicrophone': 'Mikrofon — sesini videoyla birlikte kaydetmek için',
+  'onboarding.privacyPhotos':
+    'Fotoğraflar — her videoyu "Prompter" albümüne kaydetmek için (ilk kayıtta sorulur)',
+  'onboarding.next': 'İleri',
+  'onboarding.back': 'Geri',
+  'onboarding.skip': 'Geç',
+  'onboarding.allow': 'Kamera ve mikrofona izin ver',
+  'onboarding.notNow': 'Şimdi değil',
+  'onboarding.start': 'Başla',
+  'onboarding.page': 'Sayfa {page} / {count}',
+
   'sample.script': `Merhaba, Cue Cam’e hoş geldin.
 
 Bu, kendi metnini yazmadan önce prompter’ı deneyebilmen için hazırlanmış örnek bir senaryo.
