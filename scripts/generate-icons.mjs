@@ -15,10 +15,9 @@ const glyph = readFileSync(resolve(root, 'assets/source/glyph.svg'), 'utf8').rep
   '',
 );
 const dataUri = (svg) => `data:image/svg+xml;base64,${Buffer.from(svg).toString('base64')}`;
-const monochrome = glyph.replace(/fill="#[0-9A-F]{6}"/gi, 'fill="#FFFFFF"').replace(
-  /stroke="#[0-9A-F]{6}"/gi,
-  'stroke="#FFFFFF"',
-);
+const monochrome = glyph
+  .replace(/fill="#[0-9A-F]{6}"/gi, 'fill="#FFFFFF"')
+  .replace(/stroke="#[0-9A-F]{6}"/gi, 'stroke="#FFFFFF"');
 
 // Mirrors darkPalette (src/theme/palettes.ts).
 const BACKGROUND = '#0B0B0F';
