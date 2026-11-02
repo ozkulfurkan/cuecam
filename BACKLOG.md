@@ -235,6 +235,17 @@ Claude bu dosyayı **yukarıdan aşağıya** işler. Sıra önemlidir; bir işin
     7. Kayda bas → geri sayım başlayınca çerçeve, tutamaç ve ↺ kaybolmalı; kutu sürüklenmemeli. Kayıt bitince geri gelmeli.
     8. Kutuyu kameraya en yakın yere koyup bir deneme kaydı yap: gözlerin lense yakın görünüyor mu?
 
+- [~] **PRM-35** Basılı tutunca 2× akış hızı — CİHAZ
+  - Kabul: Kayıt sırasında ekrana (yazıya ya da boş bir yere) basılı tutulunca yazı 2 kat hızlı akıyor, bırakınca normal hıza dönüyor; kısa dokunuş eskisi gibi duraklatıyor/devam ettiriyor.
+  - Durum: 300 ms'den uzun basış "tutma" sayılıyor; tutarken yazı kutusunun altında turuncu "2× hız" etiketi çıkıyor. Hız çarpanı akış motorunda (`scrollSpeed`, UI thread), duraklatılmışken etkisi yok, her yeni kayıtta sıfırlanıyor. Testler + emülatörde doğrulandı (etiket görünüyor, bırakınca kayboluyor, kayıt galeriye kaydedildi).
+  - Cihazda nasıl test edilir:
+    1. Uzun bir senaryo ile kayda başla.
+    2. Yazının üstüne parmağını basılı tut → ~0,3 sn sonra "2× hız" etiketi çıkmalı ve yazı belirgin şekilde hızlanmalı; bırak → etiket kaybolmalı, eski hıza dönmeli.
+    3. Aynısını yazı kutusunun dışında, kameranın görüntüsü üzerinde boş bir yerde dene → aynı davranış.
+    4. Yazıya kısa dokun → "Duraklatıldı" (hızlanma olmamalı); tekrar kısa dokun → devam.
+    5. Basılı tutarken kaydırıcıları ve kayıt düğmesini kullanmayı dene → onlar normal çalışmalı.
+    6. Akış hızlanırken takılma/sarsıntı var mı bak (özellikle yüksek hızda).
+
 ## Sprint 6 · Yayın
 
 - [ ] **PRM-28** İkon, açılış ekranı, uygulama adı — BULUT, FURKAN

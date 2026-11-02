@@ -16,6 +16,7 @@ import {
   lineHeightFor,
   maxScrollOffset,
   pixelsPerSecond,
+  scrollSpeed,
 } from './scroll';
 
 type Props = {
@@ -28,7 +29,12 @@ type Props = {
   restartKey: number;
   /** A new `id` moves the text by `lines` (negative = back), paused or not. */
   jump?: { id: number; lines: number };
+  /** While true the text scrolls twice as fast (press-and-hold, PRM-35). */
+  boosted?: boolean;
   onPress: () => void;
+  /** Hold started / ended on the text box. */
+  onHoldStart?: () => void;
+  onHoldEnd?: () => void;
 };
 
 /**
@@ -44,7 +50,10 @@ export function Prompter({
   playing,
   restartKey,
   jump,
+  boosted = false,
   onPress,
+  onHoldStart,
+  onHoldEnd,
 }: Props) {
   const { colors } = useTheme();
   const { t } = useI18n();
@@ -57,8 +66,8 @@ export function Prompter({
   const pendingJump = useSharedValue(0);
 
   useEffect(() => {
-    pxPerSecond.set(pixelsPerSecond(speed, fontSize));
-  }, [pxPerSecond, speed, fontSize]);
+    pxPerSecond.set(scrollSpeed(speed, fontSize, boosted));
+  }, [pxPerSecond, speed, fontSize, boosted]);
 
   useEffect(() => {
     isPlaying.set(playing);
@@ -113,6 +122,11 @@ export function Prompter({
       accessibilityLabel={t('recorder.script')}
       accessibilityHint={t(playing ? 'recorder.pauseHint' : 'recorder.resumeHint')}
       onPress={onPress}
+      // A short tap pauses; holding (long press) speeds up until released.
+      // After a long press RN does not also fire onPress, so they never clash.
+      onLongPress={onHoldStart}
+      onPressOut={onHoldEnd}
+      delayLongPress={HOLD_DELAY_MS}
       style={[
         styles.box,
         {
@@ -140,6 +154,9 @@ export function Prompter({
     </Pressable>
   );
 }
+
+/** How long a press must last to count as a hold (shorter = a tap). */
+export const HOLD_DELAY_MS = 300;
 
 const styles = StyleSheet.create({
   box: {

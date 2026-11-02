@@ -119,3 +119,22 @@ describe('UI-thread scrolling', () => {
     expect(-transform[0].translateY).toBeGreaterThan(0);
   });
 });
+
+it('scrolls twice as fast while boosted', async () => {
+  const view = await renderWithContent({ playing: true, boosted: true });
+  // The boost is applied in an effect, so it counts from the next frames.
+  const before = await scrollAfter(0, view, { playing: true, boosted: true });
+  const after = await scrollAfter(10, view, { playing: true, boosted: true });
+  expect(after - before).toBeCloseTo(2 * pixelsPerSecond(4, 36));
+});
+
+it('reports when a hold starts and ends', async () => {
+  const onHoldStart = jest.fn();
+  const onHoldEnd = jest.fn();
+  await render(<Prompter {...props({ onHoldStart, onHoldEnd })} />);
+  const text = screen.getByRole('button', { name: 'Script' });
+  await fireEvent(text, 'longPress');
+  expect(onHoldStart).toHaveBeenCalledTimes(1);
+  await fireEvent(text, 'pressOut');
+  expect(onHoldEnd).toHaveBeenCalledTimes(1);
+});

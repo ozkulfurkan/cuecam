@@ -69,6 +69,8 @@ export const tr: Record<StringKey, string> = {
   'prompter.moveBox': 'Metin kutusu: taşımak için sürükle',
   'prompter.resizeBox': 'Metin kutusu boyutu: büyütüp küçültmek için sürükle',
   'prompter.resetBox': 'Metin kutusunun konumunu ve boyutunu sıfırla',
+  'prompter.boost': '2× hız',
+  'prompter.boostHint': 'İki kat hızlı akması için basılı tut',
 
   'scripts.title': 'Senaryolar',
   'scripts.new': 'Yeni senaryo',

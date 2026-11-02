@@ -683,3 +683,19 @@ describe('text box layout', () => {
     expect(screen.queryByRole('button', { name: 'Reset text box position and size' })).toBeNull();
   });
 });
+
+describe('hold to speed up', () => {
+  it('shows the 2× badge only while the screen is held during a take', async () => {
+    await renderRecorder();
+    expect(screen.queryByTestId('boost-area')).toBeNull();
+    await startRecording();
+
+    await fireEvent(screen.getByTestId('boost-area'), 'longPress');
+    expect(screen.getByText('2× speed')).toBeTruthy();
+    await fireEvent(screen.getByTestId('boost-area'), 'pressOut');
+    expect(screen.queryByText('2× speed')).toBeNull();
+
+    await fireEvent(screen.getByRole('button', { name: 'Script' }), 'longPress');
+    expect(screen.getByText('2× speed')).toBeTruthy();
+  });
+});

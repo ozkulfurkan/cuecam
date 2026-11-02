@@ -66,6 +66,8 @@ export const en = {
   'prompter.moveBox': 'Text box: drag to move',
   'prompter.resizeBox': 'Text box size: drag to resize',
   'prompter.resetBox': 'Reset text box position and size',
+  'prompter.boost': '2× speed',
+  'prompter.boostHint': 'Hold to scroll twice as fast',
 
   'scripts.title': 'Scripts',
   'scripts.new': 'New script',

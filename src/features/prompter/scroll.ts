@@ -55,3 +55,11 @@ export function jumpOffset(offset: number, deltaPx: number, maxOffset: number): 
   'worklet';
   return Math.min(Math.max(offset + deltaPx, 0), Math.max(maxOffset, 0));
 }
+
+/** Press-and-hold makes the text scroll this many times faster (PRM-35). */
+export const BOOST_MULTIPLIER = 2;
+
+/** Scroll speed in px/s, doubled while the user holds the screen. */
+export function scrollSpeed(speed: number, fontSize: number, boosted: boolean): number {
+  return pixelsPerSecond(speed, fontSize) * (boosted ? BOOST_MULTIPLIER : 1);
+}

@@ -6,6 +6,7 @@ import {
   MAX_FRAME_STEP_MS,
   maxScrollOffset,
   pixelsPerSecond,
+  scrollSpeed,
   SPEED_RANGE,
 } from './scroll';
 
@@ -67,5 +68,12 @@ describe('jumpOffset', () => {
 
   it('stays at the top when the script fits the box', () => {
     expect(jumpOffset(0, 150, -20)).toBe(0);
+  });
+});
+
+describe('scrollSpeed', () => {
+  it('doubles the normal speed while held', () => {
+    expect(scrollSpeed(4, 36, false)).toBe(pixelsPerSecond(4, 36));
+    expect(scrollSpeed(4, 36, true)).toBe(2 * pixelsPerSecond(4, 36));
   });
 });

@@ -3,6 +3,7 @@ import {
   Alert,
   AppState,
   Linking,
+  Pressable,
   StyleSheet,
   Text,
   useWindowDimensions,
@@ -15,7 +16,7 @@ import { Button } from '@/components/Button';
 import { IconButton } from '@/components/IconButton';
 import { resolvePrompterBox, toFractions, type Bounds } from '@/features/prompter/boxEdit';
 import { controlsArea, prompterBox, type PrompterBox } from '@/features/prompter/layout';
-import { Prompter } from '@/features/prompter/Prompter';
+import { HOLD_DELAY_MS, Prompter } from '@/features/prompter/Prompter';
 import { PrompterBoxEditor } from '@/features/prompter/PrompterBoxEditor';
 import { PrompterControls } from '@/features/prompter/PrompterControls';
 import { JUMP_LINES, type KeyAction } from '@/features/prompter/keyBindings';
@@ -110,10 +111,13 @@ export function Recorder({ text, onBusyChange }: Props) {
   const [paused, setPaused] = useState(false);
   const [restartKey, setRestartKey] = useState(0);
   const [jump, setJump] = useState<{ id: number; lines: number }>();
+  // Press-and-hold doubles the scroll speed until released (PRM-35).
+  const [boosted, setBoosted] = useState(false);
   // The text only moves while the camera is actually recording, so recording
   // and scrolling start together once the countdown hands over.
   const playing = isRecording && !paused;
   const busy = isRecordingBusy(state) || countdown.isRunning;
+  const boostActive = boosted && playing;
 
   useEffect(() => {
     onBusyChange?.(busy);
@@ -162,6 +166,7 @@ export function Recorder({ text, onBusyChange }: Props) {
   const beginTake = (availableBytes: number | undefined) => {
     setSaveStatus(undefined);
     setPaused(false);
+    setBoosted(false);
     setRestartKey((key) => key + 1);
     countdown.start(() => start({ maxFileSize: maxFileSizeFor(availableBytes) }));
   };
@@ -281,6 +286,19 @@ export function Recorder({ text, onBusyChange }: Props) {
         onInterruptionStarted={onCameraInterrupted}
       />
 
+      {isRecording ? (
+        // Holding anywhere on the screen (not only on the text) speeds the
+        // text up; it sits under the text box and the controls.
+        <Pressable
+          testID="boost-area"
+          accessibilityLabel={t('prompter.boostHint')}
+          style={StyleSheet.absoluteFill}
+          onLongPress={() => setBoosted(true)}
+          onPressOut={() => setBoosted(false)}
+          delayLongPress={HOLD_DELAY_MS}
+        />
+      ) : null}
+
       <Prompter
         text={text}
         box={box}
@@ -289,7 +307,10 @@ export function Recorder({ text, onBusyChange }: Props) {
         playing={playing}
         restartKey={restartKey}
         jump={jump}
+        boosted={boostActive}
         onPress={() => setPaused((value) => !value)}
+        onHoldStart={() => setBoosted(true)}
+        onHoldEnd={() => setBoosted(false)}
       />
       {!busy ? (
         <PrompterBoxEditor
@@ -300,6 +321,25 @@ export function Recorder({ text, onBusyChange }: Props) {
           onCommit={commitBox}
           onReset={resetBox}
         />
+      ) : null}
+      {boostActive ? (
+        <Text
+          accessibilityLiveRegion="polite"
+          style={[
+            textStyles.caption,
+            styles.notice,
+            styles.pausedLabel,
+            {
+              top: pausedLabelTop,
+              left: box.left,
+              width: box.width,
+              color: colors.onAccent,
+              backgroundColor: colors.accent,
+            },
+          ]}
+        >
+          {t('prompter.boost')}
+        </Text>
       ) : null}
       {isRecording && paused ? (
         <Text
