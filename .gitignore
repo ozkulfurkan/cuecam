@@ -55,3 +55,8 @@ coverage/
 
 # store API keys (Play service account JSON etc.); upload them to EAS instead
 secrets/
+
+# store screenshots (raw and framed): large binaries, kept out of the repo
+store/screenshots/**/*.png
+store/screenshots/**/*.jpg
+store/screenshots/**/*.jpeg

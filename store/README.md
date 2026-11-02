@@ -19,17 +19,18 @@ English (United States), `tr` → Turkish – tr-TR.
    sonra Ayarlar → Dil → Türkçe yapıp aynı 6'sını tekrar al. Sıra ve içerik
    (`listings.json` → `screenshotCaptions` ile aynı sırada):
 
-   | No  | Ekran                                                     | İpucu                                                 |
-   | --- | --------------------------------------------------------- | ----------------------------------------------------- |
-   | 01  | Kayıt ekranı, ön kamera, yazı akıyor                      | İyi ışık, yüzün kameraya bakıyor                      |
-   | 02  | Kayıt sırasında (kırmızı süre sayacı görünüyor)           | Gülümse 🙂                                            |
-   | 03  | Kayıt sırasında basılı tutarken "2× hız" etiketi          |                                                       |
-   | 04  | Kayıttan önce turuncu çerçeveli yazı kutusu (taşıma modu) | Kutuyu biraz büyüt                                    |
-   | 05  | Senaryolar listesi (3–4 senaryo, okuma süreleriyle)       | Gerçekçi başlıklar: "YouTube intro", "Ürün tanıtımı"… |
-   | 06  | Kayıtlar sekmesi (birkaç video)                           |                                                       |
+   | No  | Ekran                                               | İpucu                            |
+   | --- | --------------------------------------------------- | -------------------------------- |
+   | 01  | Kayıt ekranı, ön kamera, yazı akıyor                | İyi ışık, yüzün kameraya bakıyor |
+   | 02  | Tanıtım 1. sayfa ("Kayıt yaparken oku")             |                                  |
+   | 03  | Tanıtım 2. sayfa ("Hızı sen belirlersin")           |                                  |
+   | 04  | Senaryolar listesi (3–4 senaryo, okuma süreleriyle) | Gerçekçi başlıklar               |
+   | 05  | Senaryo düzenleyici (dolu metin)                    |                                  |
+   | 06  | Kayıtlar sekmesi (birkaç video)                     |                                  |
 
 2. Dosyaları şöyle koy: `store/screenshots/raw/en-US/01.png … 06.png` ve
-   `store/screenshots/raw/tr/01.png … 06.png`.
+   `store/screenshots/raw/tr/01.png … 06.png` (`.jpg` de olur). Görseller repoya
+   girmez (`.gitignore`).
 3. Çalıştır (Playwright + Chromium gerekir: `npm i -g playwright && npx playwright install chromium`):
 
    ```bash
