@@ -63,6 +63,9 @@ export const en = {
   'prompter.size': 'Size {value}',
   'prompter.speedLabel': 'Scroll speed',
   'prompter.sizeLabel': 'Text size',
+  'prompter.moveBox': 'Text box: drag to move',
+  'prompter.resizeBox': 'Text box size: drag to resize',
+  'prompter.resetBox': 'Reset text box position and size',
 
   'scripts.title': 'Scripts',
   'scripts.new': 'New script',

@@ -220,6 +220,21 @@ Claude bu dosyayı **yukarıdan aşağıya** işler. Sıra önemlidir; bir işin
     6. Aynısını preview APK ile (panel yok) bir kez daha yapıp videoda kare atlama olup olmadığına bak.
     7. Sonuçları `docs/test-matrix.md` 27.1 satırına ve buraya yaz.
 
+## Ek istekler · Kayıt ekranı (Furkan, 2026-11-02)
+
+- [~] **PRM-34** Metin kutusunun konumu ve boyutu elle ayarlanabilir — CİHAZ
+  - Kabul: Kayıt başlamadan önce metin kutusu sürüklenerek taşınabiliyor, sağ alt köşedeki tutamaçla büyütülüp küçültülebiliyor; geri sayım/kayıt sırasında kilitli. Ayar her kamera yönü için (dikey, yatay-sol, yatay-sağ) ayrı ve kalıcı; sıfırla düğmesi varsayılana döndürüyor. Kutu güvenli alanın ve üst düğme sırasının dışına taşamıyor, en küçük 160×96.
+  - Durum: kutu turuncu kesikli çerçeveyle gösteriliyor (yalnız kayıt dışındayken). Konum/boyut ekran oranı olarak MMKV'de (`prompter.box.top|left|right`) saklanıyor, başka ekran boyutunda ölçekleniyor. Yatayda kontroller (kaydırıcılar, kayıt düğmesi) varsayılan düzende kalıyor; kutu üstlerine taşınırsa kullanıcı tercihi. Mantık `features/prompter/boxEdit.ts` + testler; emülatörde taşıma, boyutlama, sıfırla ve kayıt sırasında kilit doğrulandı.
+  - Cihazda nasıl test edilir (yeni APK veya dev build; native değişiklik yok):
+    1. Kayıt ekranını aç: metin kutusunun etrafında turuncu kesikli çerçeve ve sağ altta turuncu yuvarlak tutamaç görünmeli.
+    2. Kutuyu parmakla sürükle → birlikte gelmeli; ekranın kenarlarından ve üstteki X/kamera düğmelerinin altından dışarı çıkamamalı.
+    3. Sağ alttaki tutamacı sürükle → kutu büyüyüp küçülmeli, yazı yeni genişliğe göre satır kırmalı; çok küçültünce belli bir boyutta durmalı.
+    4. Kutunun sağ üst köşesinde beliren ↺ düğmesine bas → kutu varsayılan yerine/boyutuna dönmeli, düğme kaybolmalı.
+    5. Kutuyu yeniden taşı, kayıt ekranından çık, uygulamayı tamamen kapatıp aç → kutu aynı yerde olmalı.
+    6. Telefonu yatay çevir → yatayın kendi kutusu (varsayılan) gelmeli; orada da taşı. Dikeye dön → dikey ayarın korunmuş olmalı.
+    7. Kayda bas → geri sayım başlayınca çerçeve, tutamaç ve ↺ kaybolmalı; kutu sürüklenmemeli. Kayıt bitince geri gelmeli.
+    8. Kutuyu kameraya en yakın yere koyup bir deneme kaydı yap: gözlerin lense yakın görünüyor mu?
+
 ## Sprint 6 · Yayın
 
 - [ ] **PRM-28** İkon, açılış ekranı, uygulama adı — BULUT, FURKAN

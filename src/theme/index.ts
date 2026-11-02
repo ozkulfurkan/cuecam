@@ -10,6 +10,7 @@ export {
 export { ThemeProvider, useTheme, type Theme } from './ThemeProvider';
 export {
   fontSize,
+  frameBorderWidth,
   iconSize,
   opacity,
   radius,

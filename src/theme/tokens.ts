@@ -38,6 +38,9 @@ export const opacity = {
   disabled: 0.4,
 } as const;
 
+/** Outline width for focus/edit frames (e.g. the movable prompter box). */
+export const frameBorderWidth = 2;
+
 export const sliderSize = {
   track: 4,
   thumb: 24,

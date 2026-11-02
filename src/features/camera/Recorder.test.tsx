@@ -1,7 +1,7 @@
 import { act, fireEvent, render, screen } from '@testing-library/react-native';
 import * as mediaLibraryModule from 'expo-media-library';
 import * as fileSystemModule from 'expo-file-system';
-import { Alert, AppState, StyleSheet, type AppStateStatus } from 'react-native';
+import { Alert, AppState, Dimensions, StyleSheet, type AppStateStatus } from 'react-native';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import * as reanimatedModule from 'react-native-reanimated';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
@@ -642,5 +642,44 @@ describe('keyboard and remote', () => {
     await pressKey('jumpBack');
     await renderFrames();
     expect(prompterOffset()).toBe(0);
+  });
+});
+
+describe('text box layout', () => {
+  const boxStyle = () =>
+    StyleSheet.flatten(screen.getByRole('button', { name: 'Script' }).props.style) as {
+      top: number;
+      left: number;
+      width: number;
+      height: number;
+    };
+
+  it('lets the box be moved and resized only before a take', async () => {
+    await renderRecorder();
+    expect(screen.getByTestId('prompter-box-move')).toBeTruthy();
+    expect(screen.getByTestId('prompter-box-resize')).toBeTruthy();
+
+    await startRecording();
+    expect(screen.queryByTestId('prompter-box-move')).toBeNull();
+    expect(screen.queryByTestId('prompter-box-resize')).toBeNull();
+  });
+
+  it('uses the saved box for this camera side and can reset it', async () => {
+    storage.set('prompter.box.top', JSON.stringify({ x: 0.1, y: 0.25, width: 0.5, height: 0.2 }));
+    await renderRecorder();
+    const { width, height } = Dimensions.get('window');
+    expect(boxStyle()).toEqual(
+      expect.objectContaining({
+        left: 0.1 * width,
+        top: 0.25 * height,
+        width: 0.5 * width,
+        height: 0.2 * height,
+      }),
+    );
+
+    await pressButton('Reset text box position and size');
+    expect(boxStyle().width).not.toBe(0.5 * width);
+    expect(storage.getString('prompter.box.top')).toBeUndefined();
+    expect(screen.queryByRole('button', { name: 'Reset text box position and size' })).toBeNull();
   });
 });

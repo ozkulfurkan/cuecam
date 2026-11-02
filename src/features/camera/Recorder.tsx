@@ -13,8 +13,10 @@ import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context'
 
 import { Button } from '@/components/Button';
 import { IconButton } from '@/components/IconButton';
-import { controlsArea, prompterBox } from '@/features/prompter/layout';
+import { resolvePrompterBox, toFractions, type Bounds } from '@/features/prompter/boxEdit';
+import { controlsArea, prompterBox, type PrompterBox } from '@/features/prompter/layout';
 import { Prompter } from '@/features/prompter/Prompter';
+import { PrompterBoxEditor } from '@/features/prompter/PrompterBoxEditor';
 import { PrompterControls } from '@/features/prompter/PrompterControls';
 import { JUMP_LINES, type KeyAction } from '@/features/prompter/keyBindings';
 import { useCountdown } from '@/features/prompter/useCountdown';
@@ -24,6 +26,7 @@ import { usePrompterSettings } from '@/features/prompter/usePrompterSettings';
 import { useI18n } from '@/i18n/I18nProvider';
 import { whenAppActive } from '@/lib/whenAppActive';
 import { loadVideoQuality } from '@/storage/appSettings';
+import { clearPrompterBox, loadPrompterBox, savePrompterBox } from '@/storage/prompterLayout';
 import {
   clearPendingRecording,
   loadPendingRecording,
@@ -44,7 +47,7 @@ import { preRecordMessage, preRecordWarnings } from './preRecordCheck';
 import { maxFileSizeFor } from './storageSpace';
 import { thermalWarning } from './thermal';
 import { useThermalState } from './useThermalState';
-import { cameraSideFor } from './orientation';
+import { cameraSideFor, type CameraSide } from './orientation';
 import { canSwitchPosition, DEFAULT_POSITION, otherPosition, type LensPosition } from './preview';
 import { RecordButton } from './RecordButton';
 import { resolutionFor } from './videoQuality';
@@ -212,15 +215,50 @@ export function Recorder({ text, onBusyChange }: Props) {
   // Next to the front lens: under the top row of buttons in portrait, against
   // the camera edge in landscape (see layout.ts).
   const cameraSide = cameraSideFor(orientation);
-  const box = prompterBox({
+  const topOffset = insets.top + spacing.md + touchTarget + spacing.sm;
+  const defaultBox = prompterBox({
     screenWidth: window.width,
     screenHeight: window.height,
     cameraSide,
-    topOffset: insets.top + spacing.md + touchTarget + spacing.sm,
+    topOffset,
     bottomOffset: insets.bottom + spacing.lg,
     sideOffset: (cameraSide === 'left' ? insets.left : insets.right) + spacing.md,
   });
-  const controls = controlsArea(box, cameraSide, window.width, spacing.md);
+  // The user may move and resize the box before a take (PRM-34/35): it stays
+  // under the top row of buttons and inside the safe area. One box is kept per
+  // camera side, as fractions of the screen.
+  const screenSize = { width: window.width, height: window.height };
+  const bounds: Bounds = {
+    left: insets.left + spacing.sm,
+    top: topOffset,
+    right: window.width - insets.right - spacing.sm,
+    bottom: window.height - insets.bottom - spacing.sm,
+  };
+  const [savedBoxes, setSavedBoxes] = useState<
+    Record<CameraSide, ReturnType<typeof loadPrompterBox>>
+  >(() => ({
+    top: loadPrompterBox('top'),
+    left: loadPrompterBox('left'),
+    right: loadPrompterBox('right'),
+  }));
+  // The box while a drag is in progress (saved when the drag ends).
+  const [draftBox, setDraftBox] = useState<PrompterBox>();
+  const savedBox = savedBoxes[cameraSide];
+  const box = draftBox ?? resolvePrompterBox(defaultBox, savedBox, screenSize, bounds);
+  const commitBox = (next: PrompterBox) => {
+    const fractions = toFractions(next, screenSize);
+    savePrompterBox(cameraSide, fractions);
+    setSavedBoxes((boxes) => ({ ...boxes, [cameraSide]: fractions }));
+    setDraftBox(undefined);
+  };
+  const resetBox = () => {
+    clearPrompterBox(cameraSide);
+    setSavedBoxes((boxes) => ({ ...boxes, [cameraSide]: undefined }));
+    setDraftBox(undefined);
+  };
+  // Controls follow the default layout, so a moved box never pushes the
+  // sliders and record button off screen in landscape.
+  const controls = controlsArea(defaultBox, cameraSide, window.width, spacing.md);
   const pausedLabelTop = Math.min(
     box.top + box.height + spacing.sm,
     // In landscape the box reaches the bottom; keep the label on screen.
@@ -253,6 +291,16 @@ export function Recorder({ text, onBusyChange }: Props) {
         jump={jump}
         onPress={() => setPaused((value) => !value)}
       />
+      {!busy ? (
+        <PrompterBoxEditor
+          box={box}
+          bounds={bounds}
+          isCustom={savedBox !== undefined}
+          onChange={setDraftBox}
+          onCommit={commitBox}
+          onReset={resetBox}
+        />
+      ) : null}
       {isRecording && paused ? (
         <Text
           style={[
