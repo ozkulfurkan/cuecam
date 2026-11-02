@@ -113,6 +113,38 @@ export const en = {
   'settings.testCrash': 'Test crash',
   'settings.testCrashHint': 'Throws an error to check that Sentry receives it',
 
+  'settings.about': 'About',
+  'settings.showIntro': 'Show introduction',
+  'settings.privacyPolicy': 'Privacy policy',
+  'settings.contact': 'Contact support',
+  'settings.version': 'Version {version}',
+
+  'onboarding.welcomeTitle': 'Read while you record',
+  'onboarding.welcomeBody':
+    'Your script scrolls right under the camera, so on video you look straight at your audience.',
+  'onboarding.welcomePoint1': 'Write or paste a script, then press record',
+  'onboarding.welcomePoint2': 'Videos are saved to the "Prompter" album in your gallery',
+  'onboarding.controlsTitle': 'You set the pace',
+  'onboarding.controlsBody': 'While recording, the text follows simple gestures:',
+  'onboarding.controlsPoint1': 'Tap the text to pause or continue',
+  'onboarding.controlsPoint2': 'Hold anywhere to scroll twice as fast',
+  'onboarding.controlsPoint3': 'Change speed and text size with the sliders',
+  'onboarding.controlsPoint4': 'Before recording, drag the text box to move or resize it',
+  'onboarding.privacyTitle': 'Why Cue Cam asks for access',
+  'onboarding.privacyBody':
+    'Your scripts and videos stay on your phone. Cue Cam has no account and never uploads them.',
+  'onboarding.privacyCamera': 'Camera — to film you while you read',
+  'onboarding.privacyMicrophone': 'Microphone — to record your voice with the video',
+  'onboarding.privacyPhotos':
+    'Photos — to save each video to the "Prompter" album (asked on the first save)',
+  'onboarding.next': 'Next',
+  'onboarding.back': 'Back',
+  'onboarding.skip': 'Skip',
+  'onboarding.allow': 'Allow camera and microphone',
+  'onboarding.notNow': 'Not now',
+  'onboarding.start': 'Get started',
+  'onboarding.page': 'Page {page} of {count}',
+
   'sample.script': `Hi, and welcome to Cue Cam.
 
 This is a sample script so you can try the prompter before writing your own.

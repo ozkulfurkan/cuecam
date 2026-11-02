@@ -1,5 +1,6 @@
+import Constants from 'expo-constants';
 import { useState } from 'react';
-import { ScrollView, StyleSheet, Text, View } from 'react-native';
+import { Linking, ScrollView, StyleSheet, Text, View } from 'react-native';
 
 import { Button } from '@/components/Button';
 import { Card } from '@/components/Card';
@@ -7,10 +8,12 @@ import { Screen } from '@/components/Screen';
 import { SegmentedControl } from '@/components/SegmentedControl';
 import { Slider } from '@/components/Slider';
 import { qualityLabel } from '@/features/camera/videoQuality';
+import { onboardingStore } from '@/features/onboarding/onboardingStore';
 import { FONT_SIZE_RANGE, SPEED_RANGE } from '@/features/prompter/scroll';
 import { usePrompterSettings } from '@/features/prompter/usePrompterSettings';
 import { useI18n } from '@/i18n/I18nProvider';
 import type { LanguagePreference } from '@/i18n/translate';
+import { privacyPolicyUrl, supportUrl } from '@/lib/links';
 import {
   loadVideoQuality,
   saveVideoQuality,
@@ -22,7 +25,7 @@ import { spacing, textStyles, useTheme } from '@/theme';
 // Mirroring the recorded video (PRM-11) is deferred, so it has no setting here.
 export default function SettingsScreen() {
   const { colors } = useTheme();
-  const { t, preference, setPreference } = useI18n();
+  const { t, language, preference, setPreference } = useI18n();
   const prompter = usePrompterSettings();
   const [quality, setQuality] = useState<VideoQuality>(loadVideoQuality);
   const [crash, setCrash] = useState(false);
@@ -101,6 +104,30 @@ export default function SettingsScreen() {
             onChange={setPreference}
             accessibilityLabel={t('settings.language')}
           />
+        </Card>
+
+        <Text accessibilityRole="header" style={heading}>
+          {t('settings.about')}
+        </Text>
+        <Card>
+          <Button
+            label={t('settings.showIntro')}
+            variant="secondary"
+            onPress={onboardingStore.restart}
+          />
+          <Button
+            label={t('settings.privacyPolicy')}
+            variant="secondary"
+            onPress={() => Linking.openURL(privacyPolicyUrl(language))}
+          />
+          <Button
+            label={t('settings.contact')}
+            variant="secondary"
+            onPress={() => Linking.openURL(supportUrl(language))}
+          />
+          <Text style={hint}>
+            {t('settings.version', { version: Constants.expoConfig?.version ?? '—' })}
+          </Text>
         </Card>
 
         {__DEV__ ? (

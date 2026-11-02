@@ -257,8 +257,10 @@ Claude bu dosyayı **yukarıdan aşağıya** işler. Sıra önemlidir; bir işin
     2. Ana ekranda ikon: koyu zemin, turuncu lens, altında 3 çizgi; kenarlar kırpılmamış (yuvarlak/kare launcher'larda da).
     3. Android 13+: Ayarlar → Duvar kağıdı → "Temalı simgeler" açıkken ikon tek renk görünmeli.
     4. Uygulamayı soğuk başlat: koyu zeminde ortada ikon glifi, ardından Senaryolar ekranı; beyaz flaş olmamalı.
-- [ ] **PRM-29** İlk açılış rehberi — BULUT
+- [x] **PRM-29** İlk açılış rehberi — BULUT
   - Kabul: 3 ekranlık tanıtım + izinlerin neden istendiği.
+  - Durum: ilk açılışta `app/onboarding.tsx` (Kayıt yaparken oku → Hızı sen belirlersin → Cue Cam neden izin ister?). Son sayfa kamera/mikrofon/fotoğraf izinlerinin nedenini yazıyor ve "Kamera ve mikrofona izin ver" ile sistem diyaloglarını açıyor (ret de olsa uygulamaya geçer); "Şimdi değil"/"Geç" hiçbir şey sormaz. Fotoğraf izni yine ilk kayıtta sorulur. Tamamlanma MMKV'de (`onboarding.completed.v1`); kök navigasyon `Stack.Protected` ile rehber bitene kadar sekmeleri kapatıyor. Ayarlar → Hakkında: "Tanıtımı yeniden göster", "Gizlilik politikası", "Destek ile iletişim", sürüm.
+  - Telefonda bakılacak (yeni APK ile): uygulamayı silip kur → rehber açılmalı, 3 sayfa, son sayfada izin diyalogları sırayla; Ayarlar → Tanıtımı yeniden göster rehberi tekrar açmalı.
 - [ ] **PRM-30** Gizlilik politikası ve veri formları — FURKAN
   - Kabul: yayında gizlilik sayfası; App Store gizlilik etiketleri ve Play "Veri güvenliği" formu dolu.
 - [ ] **PRM-31** Mağaza listeleri — BULUT, FURKAN

@@ -1,7 +1,10 @@
 import { act, fireEvent, renderRouter, screen, testRouter } from 'expo-router/testing-library';
 
+import { onboardingStore } from '@/features/onboarding/onboardingStore';
 import { scriptStore } from '@/features/scripts/scriptStore';
+import { saveOnboardingCompleted } from '@/storage/onboarding';
 import { storage } from '@/storage/storage';
+import * as visionCameraModule from 'react-native-vision-camera';
 
 // Native-backed modules used by the routes. (Reanimated: expo-router's testing
 // library mocks it with 'react-native-reanimated/mock', which package.json maps
@@ -16,9 +19,19 @@ jest.mock('@sentry/react-native', () => ({
   wrapExpoRouterErrorBoundary: <T,>(component: T) => component,
 }));
 
+type Status = 'not-determined' | 'authorized';
+// Helpers from __mocks__/react-native-vision-camera.ts (shared mock instance).
+const { requestCalls, setMockPermissions } = visionCameraModule as unknown as {
+  setMockPermissions: (statuses: { camera?: Status; microphone?: Status }) => void;
+  requestCalls: string[];
+};
+
 beforeEach(() => {
   storage.clearAll();
   scriptStore.resetForTests();
+  onboardingStore.resetForTests();
+  // Most tests start in the app itself; the intro has its own tests below.
+  saveOnboardingCompleted(true);
 });
 
 describe('navigation', () => {
@@ -117,5 +130,64 @@ describe('settings', () => {
       selected: true,
     });
     expect(storage.getString('settings.videoQuality')).toBe('4k');
+  });
+});
+
+describe('onboarding', () => {
+  beforeEach(() => {
+    saveOnboardingCompleted(false);
+    setMockPermissions({ camera: 'not-determined', microphone: 'not-determined' });
+    requestCalls.length = 0;
+  });
+
+  it('shows the intro on first launch, then asks for access and opens the app', async () => {
+    await renderRouter('./app');
+    expect(screen).toHavePathname('/onboarding');
+    expect(screen.getByText('Read while you record')).toBeTruthy();
+
+    await fireEvent.press(screen.getByRole('button', { name: 'Next' }));
+    expect(screen.getByText('You set the pace')).toBeTruthy();
+    await fireEvent.press(screen.getByRole('button', { name: 'Next' }));
+    expect(screen.getByText('Why Cue Cam asks for access')).toBeTruthy();
+    expect(screen.getByText('Camera — to film you while you read')).toBeTruthy();
+
+    await fireEvent.press(screen.getByRole('button', { name: 'Allow camera and microphone' }));
+    expect(requestCalls).toEqual(['camera', 'microphone']);
+    expect(screen).toHavePathname('/');
+    expect(screen.getByText('No scripts yet')).toBeTruthy();
+  });
+
+  it('can be skipped without asking for anything, and is not shown again', async () => {
+    await renderRouter('./app');
+    await fireEvent.press(screen.getByRole('button', { name: 'Skip' }));
+    expect(screen).toHavePathname('/');
+    expect(requestCalls).toEqual([]);
+
+    onboardingStore.resetForTests();
+    await renderRouter('./app');
+    expect(screen).toHavePathname('/');
+  });
+
+  it('goes back a page', async () => {
+    await renderRouter('./app');
+    await fireEvent.press(screen.getByRole('button', { name: 'Next' }));
+    await fireEvent.press(screen.getByRole('button', { name: 'Back' }));
+    expect(screen.getByText('Read while you record')).toBeTruthy();
+  });
+
+  it('can be reopened from Settings and finished with "Get started" when access is granted', async () => {
+    setMockPermissions({ camera: 'authorized', microphone: 'authorized' });
+    saveOnboardingCompleted(true);
+    await renderRouter('./app');
+
+    await fireEvent.press(screen.getByLabelText(/^Settings, tab/));
+    await fireEvent.press(screen.getByRole('button', { name: 'Show introduction' }));
+    expect(screen).toHavePathname('/onboarding');
+
+    await fireEvent.press(screen.getByRole('button', { name: 'Next' }));
+    await fireEvent.press(screen.getByRole('button', { name: 'Next' }));
+    await fireEvent.press(screen.getByRole('button', { name: 'Get started' }));
+    expect(requestCalls).toEqual([]);
+    expect(screen).toHavePathname('/');
   });
 });

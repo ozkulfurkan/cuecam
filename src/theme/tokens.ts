@@ -28,10 +28,15 @@ export const iconSize = {
   sm: 18,
   md: 24,
   lg: 32,
+  /** Hero icons, e.g. on the intro pages. */
+  xl: 56,
 } as const;
 
 // Minimum touch target (Apple HIG 44pt, Material 48dp — use the larger).
 export const touchTarget = 48;
+
+/** Page indicator dots (intro). */
+export const dotSize = 8;
 
 export const opacity = {
   pressed: 0.8,
