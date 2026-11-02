@@ -1,6 +1,6 @@
 // Turns raw phone screenshots into store screenshots with a caption on top.
 //
-//   store/screenshots/raw/<locale>/01.png … 06.png   (your phone screenshots)
+//   store/screenshots/raw/<locale>/01.png … 06.png   (your phone screenshots, .png or .jpg)
 //   → store/screenshots/<locale>/app-store/01.png     1290×2796 (iPhone 6.7"/6.9")
 //   → store/screenshots/<locale>/play/01.png          1080×1920 (Play phone)
 //
@@ -39,10 +39,14 @@ let written = 0;
 
 for (const [locale, listing] of Object.entries(listings)) {
   for (const [index, caption] of listing.screenshotCaptions.entries()) {
-    const file = `${String(index + 1).padStart(2, '0')}.png`;
-    const raw = resolve(root, 'store/screenshots/raw', locale, file);
-    if (!existsSync(raw)) continue;
-    const image = `data:image/png;base64,${readFileSync(raw).toString('base64')}`;
+    const number = String(index + 1).padStart(2, '0');
+    const file = `${number}.png`;
+    const raw = ['png', 'jpg', 'jpeg']
+      .map((extension) => resolve(root, 'store/screenshots/raw', locale, `${number}.${extension}`))
+      .find((path) => existsSync(path));
+    if (!raw) continue;
+    const mime = raw.endsWith('.png') ? 'image/png' : 'image/jpeg';
+    const image = `data:${mime};base64,${readFileSync(raw).toString('base64')}`;
 
     for (const { name, width, height } of TARGETS) {
       const unit = width / 100;
