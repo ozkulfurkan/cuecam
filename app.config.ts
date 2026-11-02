@@ -31,7 +31,7 @@ const permissions = {
 
 // App Store privacy manifest (PrivacyInfo.xcprivacy). Libraries ship their own;
 // this declares what the app as a whole collects (Sentry crash and performance
-// reports, not linked to the user, no tracking) and the "required reason" APIs
+// and diagnostic reports, not linked to the user, no tracking) and the "required reason" APIs
 // used by app code: settings storage, file dates of recordings, free disk space
 // before recording (preRecordCheck) and uptime-based timers.
 // Keep in sync with store/privacy-labels.md.
@@ -47,6 +47,12 @@ const privacyManifests = {
     },
     {
       NSPrivacyCollectedDataType: 'NSPrivacyCollectedDataTypePerformanceData',
+      NSPrivacyCollectedDataTypeLinked: false,
+      NSPrivacyCollectedDataTypeTracking: false,
+      NSPrivacyCollectedDataTypePurposes: ['NSPrivacyCollectedDataTypePurposeAppFunctionality'],
+    },
+    {
+      NSPrivacyCollectedDataType: 'NSPrivacyCollectedDataTypeOtherDiagnosticData',
       NSPrivacyCollectedDataTypeLinked: false,
       NSPrivacyCollectedDataTypeTracking: false,
       NSPrivacyCollectedDataTypePurposes: ['NSPrivacyCollectedDataTypePurposeAppFunctionality'],

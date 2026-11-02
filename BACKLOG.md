@@ -261,8 +261,15 @@ Claude bu dosyayı **yukarıdan aşağıya** işler. Sıra önemlidir; bir işin
   - Kabul: 3 ekranlık tanıtım + izinlerin neden istendiği.
   - Durum: ilk açılışta `app/onboarding.tsx` (Kayıt yaparken oku → Hızı sen belirlersin → Cue Cam neden izin ister?). Son sayfa kamera/mikrofon/fotoğraf izinlerinin nedenini yazıyor ve "Kamera ve mikrofona izin ver" ile sistem diyaloglarını açıyor (ret de olsa uygulamaya geçer); "Şimdi değil"/"Geç" hiçbir şey sormaz. Fotoğraf izni yine ilk kayıtta sorulur. Tamamlanma MMKV'de (`onboarding.completed.v1`); kök navigasyon `Stack.Protected` ile rehber bitene kadar sekmeleri kapatıyor. Ayarlar → Hakkında: "Tanıtımı yeniden göster", "Gizlilik politikası", "Destek ile iletişim", sürüm.
   - Telefonda bakılacak (yeni APK ile): uygulamayı silip kur → rehber açılmalı, 3 sayfa, son sayfada izin diyalogları sırayla; Ayarlar → Tanıtımı yeniden göster rehberi tekrar açmalı.
-- [ ] **PRM-30** Gizlilik politikası ve veri formları — FURKAN
+- [~] **PRM-30** Gizlilik politikası ve veri formları — FURKAN
   - Kabul: yayında gizlilik sayfası; App Store gizlilik etiketleri ve Play "Veri güvenliği" formu dolu.
+  - Durum: gizlilik politikası TR/EN (`docs/privacy/`), destek sayfası + SSS TR/EN (`docs/support/`), basit tanıtım sayfası (`docs/index.html`). GitHub Pages ile yayınlanacak: `https://ozkulfurkan.github.io/cuecam/privacy/`. Uygulamada Ayarlar → Hakkında'dan açılıyor (dile göre TR/EN). Form cevapları hazır: `store/privacy-labels.md` (App Store), `store/data-safety.md` (Play), diğer Play "App content" cevapları `store/play-console.md`. iOS gizlilik manifesti aynı beyanla `app.config.ts`'te.
+  - İletişim olarak GitHub Issues kullanıldı (e-postanı herkese açık sayfaya koymadım); istersen politikaya e-posta ekle.
+  - Furkan'dan:
+    1. GitHub → repo → Settings → Pages → Source: "Deploy from a branch", Branch: `main`, klasör `/docs` → Save. (Bu branch `main`'e birleşince.) 1–2 dk sonra linki aç.
+    2. Sentry → cuecam → Settings → Security & Privacy → "Prevent Storing of IP Addresses" aç.
+    3. Formları dosyalardaki cevaplarla doldur (App Store Connect'te ve Play Console'da).
+    4. ⚠️ Play "Photo and video permissions" beyanı — `store/play-console.md`'deki metni kullan.
 - [ ] **PRM-31** Mağaza listeleri — BULUT, FURKAN
   - Kabul: ekran görüntüleri, TR/EN açıklama, anahtar kelimeler (metinler `store/` klasöründe).
 - [ ] **PRM-32** Kapalı test — CİHAZ, FURKAN
