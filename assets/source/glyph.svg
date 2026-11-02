@@ -1,0 +1,16 @@
+<!-- Cue Cam glyph: a camera lens with the script lines right under it. -->
+<!-- Drawn on a 1024 canvas; every icon PNG is rendered from this file. -->
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1024 1024">
+  <g id="lens">
+    <circle cx="512" cy="360" r="168" fill="none" stroke="#F5A524" stroke-width="44"/>
+    <circle cx="512" cy="360" r="120" fill="#202028"/>
+    <circle cx="512" cy="360" r="64" fill="#0B0B0F"/>
+    <circle cx="478" cy="326" r="20" fill="#F5F5F7" fill-opacity="0.7"/>
+    <circle cx="726" cy="196" r="38" fill="#FF3B30"/>
+  </g>
+  <g id="lines">
+    <rect x="252" y="602" width="520" height="52" rx="26" fill="#F5A524"/>
+    <rect x="292" y="694" width="440" height="52" rx="26" fill="#F5F5F7" fill-opacity="0.85"/>
+    <rect x="332" y="786" width="360" height="52" rx="26" fill="#F5F5F7" fill-opacity="0.45"/>
+  </g>
+</svg>
