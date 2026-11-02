@@ -248,10 +248,10 @@ Claude bu dosyayı **yukarıdan aşağıya** işler. Sıra önemlidir; bir işin
 
 ## Sprint 6 · Yayın
 
-- [~] **PRM-28** İkon, açılış ekranı, uygulama adı — BULUT, FURKAN
+- [x] **PRM-28** İkon, açılış ekranı, uygulama adı — BULUT, FURKAN
+  - ✅ Furkan telefonda kontrol etti ve onayladı (2026-11-02): ikon, açılış ekranı, ilk açılış rehberi ve izin akışı tamam; `docs/RELEASE.md` Adım 1 geçti, yayına hazır.
   - Durum: ad `Cue Cam` (PRM-2'de seçildi). Yeni ikon: koyu zemin, amber kamera lensi + kırmızı kayıt noktası, altında akan senaryo satırları (lensin altında okuma fikri). Tek kaynak `assets/source/glyph.svg`; tüm PNG'ler `scripts/generate-icons.mjs` ile üretiliyor (iOS/genel ikon 1024, Android adaptive ön/arka/tek renk, açılış ekranı, favicon, Play ikonu 512 ve Play öne çıkan görsel 1024×500 → `store/graphics/`). Varsayılan Expo `expo.icon` kaldırıldı; iOS da `icon.png` kullanıyor. Açılış ekranında glif 200 pt.
   - Yayın ayarları: iPad kapalı (`supportsTablet: false` → iPad ekran görüntüsü gerekmez), `ITSAppUsesNonExemptEncryption: false` (her yüklemede şifreleme sorusu çıkmaz), iOS gizlilik manifesti (`privacyManifests`).
-  - Furkan'dan: ikon tasarımını onayla (beğenmezsen SVG'yi değiştirip komutu yeniden çalıştırmak yeterli).
   - Cihazda nasıl test edilir (yeni preview APK gerekir — native değişiklik):
     1. Eski uygulamayı kaldır, yeni APK'yı kur.
     2. Ana ekranda ikon: koyu zemin, turuncu lens, altında 3 çizgi; kenarlar kırpılmamış (yuvarlak/kare launcher'larda da).
