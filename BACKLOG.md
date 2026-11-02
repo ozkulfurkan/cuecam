@@ -274,10 +274,14 @@ Claude bu dosyayı **yukarıdan aşağıya** işler. Sıra önemlidir; bir işin
   - Kabul: ekran görüntüleri, TR/EN açıklama, anahtar kelimeler (metinler `store/` klasöründe).
   - Durum: TR/EN metinler `store/listings.json` (App Store: ad "Cue Cam: Teleprompter Video" / "Cue Cam: Prompter Kamera", alt başlık, tanıtım metni, açıklama, anahtar kelimeler, yenilikler; Play: başlık, kısa ve uzun açıklama). Karakter sınırları ve anahtar kelime kuralları (100 bayt, tekrar yok, ad/alt başlıktaki kelimeler yok) `store/listings.test.ts` ile denetleniyor. Play ikonu ve öne çıkan görsel `store/graphics/`. Ekran görüntüleri için çekim listesi ve çerçeveleme betiği: `store/README.md`, `scripts/frame-screenshots.mjs` (App Store 1290×2796, Play 1080×1920, başlıklı).
   - Furkan'dan: metinleri oku/onayla; telefonda 6+6 ham ekran görüntüsü al → `store/README.md` adımları. App Store'da "Cue Cam" adı alınmışsa adı `listings.json`'da değiştir (test sınırı kontrol eder).
-- [ ] **PRM-32** Kapalı test — CİHAZ, FURKAN
+- [~] **PRM-32** Kapalı test — CİHAZ, FURKAN
   - Kabul: TestFlight ve Play kapalı testi tamam, kritik hata yok.
+  - Durum (hazırlık): `eas.json` — her derleme profili kendi EAS ortamını kullanıyor (production derlemesi production ortamındaki Sentry DSN'ini alır), production Android AAB; gönderim profilleri `production` (Play dahili test, taslak), `closed-test` (Play kapalı test "alpha") ve `store` (Play üretim, taslak). Adım adım rehber: `docs/RELEASE.md` (Adım 0–5 Android, Adım 7 iOS/TestFlight).
+  - ⚠️ Yeni kişisel Play hesaplarında üretimden önce 12 test kullanıcısıyla 14 gün kapalı test zorunlu; ilk AAB Play Console'a elle yüklenmeli.
+  - Furkan'dan: `docs/RELEASE.md` Adım 0–5; iOS için Apple Developer üyeliği.
 - [ ] **PRM-33** Mağazalara gönderim — FURKAN
   - Kabul: EAS Submit ile iki mağazaya gönderildi.
+  - Hazırlık: komutlar ve App Store Connect alanları `docs/RELEASE.md` Adım 6–7'de. Önkoşul: PRM-32.
 
 ---
 
