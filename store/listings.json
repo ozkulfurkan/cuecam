@@ -1,0 +1,46 @@
+{
+  "en-US": {
+    "appStore": {
+      "name": "Cue Cam: Teleprompter Video",
+      "subtitle": "Read your script on camera",
+      "promotionalText": "Look straight at your audience: your script scrolls right under the camera while you record. No account, no watermark, scripts stay on your phone.",
+      "keywords": "prompter,autocue,selfie,vlog,reels,tiktok,presentation,speech,recorder,lines,speaker,youtube,talk",
+      "whatsNew": "First release of Cue Cam."
+    },
+    "play": {
+      "title": "Cue Cam: Teleprompter Video",
+      "shortDescription": "Teleprompter camera: read your script under the lens while you record video."
+    },
+    "description": "Cue Cam turns your phone into a teleprompter camera. Your script scrolls in a narrow column right under the lens, so you read naturally while looking straight at your audience — no more glancing away or memorizing lines.\n\nRECORD WITH YOUR SCRIPT\n• Text scrolls smoothly next to the camera while video and sound are recorded\n• 3-2-1 countdown, then recording and scrolling start together\n• Front or back camera, portrait or landscape\n• 720p, 1080p or 4K\n• Every take is saved to a \"Prompter\" album in your gallery\n\nSTAY IN CONTROL\n• Tap the text to pause, tap again to continue\n• Hold the screen to scroll twice as fast\n• Change speed and text size while recording\n• Drag and resize the text box to put it as close to the lens as you like\n• Bluetooth remotes and keyboards: pause, speed and jump with a click\n\nWRITE AND ORGANIZE\n• Write, paste or import .txt scripts\n• See the reading time of each script at your speed\n• Search your scripts and record any of them in one tap\n• Watch and share your recordings from the app\n\nBUILT FOR REAL SHOOTS\n• Long takes without dropped frames\n• Recording stops safely and keeps your video if storage runs out, the phone overheats or a call comes in\n• Dark theme designed for filming\n\nPRIVATE BY DESIGN\nNo account and no ads. Your scripts and videos stay on your phone and are never uploaded.\n\nPerfect for YouTube videos, Reels, TikTok, vlogs, online courses, presentations, video messages and speeches.",
+    "screenshotCaptions": [
+      "Read your script under the lens",
+      "Look straight at your audience",
+      "Tap to pause, hold for 2× speed",
+      "Move the text box anywhere",
+      "All your scripts in one place",
+      "Videos saved to your gallery"
+    ]
+  },
+  "tr": {
+    "appStore": {
+      "name": "Cue Cam: Prompter Kamera",
+      "subtitle": "Senaryonu kameraya bakarak oku",
+      "promotionalText": "Doğrudan izleyicine bak: kayıt yaparken senaryon kameranın hemen altında akar. Hesap yok, filigran yok, senaryoların telefonunda kalır.",
+      "keywords": "teleprompter,otomatik,metin,senaryo,video,kayıt,vlog,reels,tiktok,sunum,konuşma,youtube,okuma",
+      "whatsNew": "Cue Cam'in ilk sürümü."
+    },
+    "play": {
+      "title": "Cue Cam: Prompter Kamera",
+      "shortDescription": "Prompter kamera: video çekerken senaryonu lensin hemen altında oku."
+    },
+    "description": "Cue Cam telefonunu kameralı bir prompter'a dönüştürür. Senaryon lensin hemen altında dar bir sütunda akar; böylece doğal bir şekilde okurken doğrudan izleyicine bakarsın — gözünü kaçırmak ya da ezberlemek yok.\n\nSENARYONLA KAYDET\n• Video ve ses kaydedilirken yazı kameranın yanında akıcı şekilde akar\n• 3-2-1 geri sayım, ardından kayıt ve akış birlikte başlar\n• Ön veya arka kamera, dikey veya yatay\n• 720p, 1080p veya 4K\n• Her çekim galerinde \"Prompter\" albümüne kaydedilir\n\nKONTROL SENDE\n• Duraklatmak için yazıya dokun, devam etmek için tekrar dokun\n• 2 kat hızlı akıtmak için ekrana basılı tut\n• Kayıt sırasında hızı ve yazı boyutunu değiştir\n• Yazı kutusunu sürükleyip boyutlandırarak lense istediğin kadar yaklaştır\n• Bluetooth kumanda ve klavye: tek tıkla duraklat, hızlandır, atla\n\nYAZ VE DÜZENLE\n• Senaryo yaz, yapıştır veya .txt dosyası içe aktar\n• Her senaryonun senin hızındaki okuma süresini gör\n• Senaryolarında ara, istediğini tek dokunuşla kaydet\n• Kayıtlarını uygulamada izle ve paylaş\n\nGERÇEK ÇEKİMLER İÇİN\n• Uzun çekimlerde kare kaybı yok\n• Depolama dolarsa, telefon ısınırsa veya arama gelirse kayıt güvenle durur ve videon korunur\n• Çekim için tasarlanmış karanlık tema\n\nGİZLİLİK ÖNCELİKLİ\nHesap yok, reklam yok. Senaryoların ve videoların telefonunda kalır, hiçbir yere yüklenmez.\n\nYouTube videoları, Reels, TikTok, vlog, online eğitim, sunum, video mesaj ve konuşmalar için ideal.",
+    "screenshotCaptions": [
+      "Senaryonu lensin altında oku",
+      "Doğrudan izleyicine bak",
+      "Dokun duraklat, basılı tut 2× hız",
+      "Yazı kutusunu istediğin yere taşı",
+      "Tüm senaryoların tek yerde",
+      "Videolar galerine kaydedilir"
+    ]
+  }
+}

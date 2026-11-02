@@ -2,20 +2,20 @@
 
 Play Console → Uygulama → **Policy and programs → App content**. Hepsi bir kez doldurulur.
 
-| Bölüm | Cevap |
-| --- | --- |
-| **Privacy policy** | `https://ozkulfurkan.github.io/cuecam/privacy/` |
-| **App access** | All functionality is available without special access (giriş yok) |
-| **Ads** | No, my app does not contain ads |
-| **Content rating** | Aşağıdaki IARC cevapları → beklenen sonuç: **PEGI 3 / Everyone / 3+** |
+| Bölüm                           | Cevap                                                                                                                                                      |
+| ------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Privacy policy**              | `https://ozkulfurkan.github.io/cuecam/privacy/`                                                                                                            |
+| **App access**                  | All functionality is available without special access (giriş yok)                                                                                          |
+| **Ads**                         | No, my app does not contain ads                                                                                                                            |
+| **Content rating**              | Aşağıdaki IARC cevapları → beklenen sonuç: **PEGI 3 / Everyone / 3+**                                                                                      |
 | **Target audience and content** | Yaş grupları: **13–15, 16–17, 18+** · "Could your app unintentionally appeal to children?" → **No** (13 altı seçilmez → Aileler politikası devreye girmez) |
-| **News app** | No |
-| **COVID-19 contact tracing** | My app is not a publicly available COVID-19 app |
-| **Data safety** | `store/data-safety.md` |
-| **Government app** | No |
-| **Financial features** | My app doesn't provide any financial features |
-| **Health** | My app does not have any health features |
-| **Photo and video permissions** | Aşağıya bak ⚠️ |
+| **News app**                    | No                                                                                                                                                         |
+| **COVID-19 contact tracing**    | My app is not a publicly available COVID-19 app                                                                                                            |
+| **Data safety**                 | `store/data-safety.md`                                                                                                                                     |
+| **Government app**              | No                                                                                                                                                         |
+| **Financial features**          | My app doesn't provide any financial features                                                                                                              |
+| **Health**                      | My app does not have any health features                                                                                                                   |
+| **Photo and video permissions** | Aşağıya bak ⚠️                                                                                                                                             |
 
 ## Content rating (IARC) anketi
 

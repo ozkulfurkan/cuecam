@@ -270,8 +270,10 @@ Claude bu dosyayı **yukarıdan aşağıya** işler. Sıra önemlidir; bir işin
     2. Sentry → cuecam → Settings → Security & Privacy → "Prevent Storing of IP Addresses" aç.
     3. Formları dosyalardaki cevaplarla doldur (App Store Connect'te ve Play Console'da).
     4. ⚠️ Play "Photo and video permissions" beyanı — `store/play-console.md`'deki metni kullan.
-- [ ] **PRM-31** Mağaza listeleri — BULUT, FURKAN
+- [~] **PRM-31** Mağaza listeleri — BULUT, FURKAN
   - Kabul: ekran görüntüleri, TR/EN açıklama, anahtar kelimeler (metinler `store/` klasöründe).
+  - Durum: TR/EN metinler `store/listings.json` (App Store: ad "Cue Cam: Teleprompter Video" / "Cue Cam: Prompter Kamera", alt başlık, tanıtım metni, açıklama, anahtar kelimeler, yenilikler; Play: başlık, kısa ve uzun açıklama). Karakter sınırları ve anahtar kelime kuralları (100 bayt, tekrar yok, ad/alt başlıktaki kelimeler yok) `store/listings.test.ts` ile denetleniyor. Play ikonu ve öne çıkan görsel `store/graphics/`. Ekran görüntüleri için çekim listesi ve çerçeveleme betiği: `store/README.md`, `scripts/frame-screenshots.mjs` (App Store 1290×2796, Play 1080×1920, başlıklı).
+  - Furkan'dan: metinleri oku/onayla; telefonda 6+6 ham ekran görüntüsü al → `store/README.md` adımları. App Store'da "Cue Cam" adı alınmışsa adı `listings.json`'da değiştir (test sınırı kontrol eder).
 - [ ] **PRM-32** Kapalı test — CİHAZ, FURKAN
   - Kabul: TestFlight ve Play kapalı testi tamam, kritik hata yok.
 - [ ] **PRM-33** Mağazalara gönderim — FURKAN
